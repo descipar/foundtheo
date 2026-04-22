@@ -1,0 +1,23 @@
+name = "foundtheo"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "theo-badge"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "theo-badges-images"
+jurisdiction = "eu"
+
+[vars]
+THEO_BIRTH_DATE = "2025-04-17"
+THEO_EMAIL = "kai.schulte@adesso.de"
+THEO_PHONE = "+49 1522 8644639"
+THEO_NAME = "Theo"
+THEO_BREED = "Labrador"
+THEO_TITLE = "Chief Snack Officer"
+THEO_BADGE_NR = "170425"

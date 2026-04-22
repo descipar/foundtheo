@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Wrangler local dev (SQLite für D1, R2-Blob-Store etc.)
+.wrangler/
+
+# Lokale Secrets / Umgebungsvariablen – NIEMALS committen!
+.dev.vars
+.env
+.env.*
+
+# Build-Ausgabe
+dist/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
