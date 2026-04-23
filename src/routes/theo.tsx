@@ -1,6 +1,7 @@
 /** @jsxImportSource hono/jsx */
 import { Hono } from "hono";
-import { TheoPage, calcAge } from "../components/TheoPage";
+import { TheoPage } from "../components/TheoPage";
+import { calcAge } from "../utils/calcAge";
 import { recordScan, getScanStats } from "../db/scans";
 import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
