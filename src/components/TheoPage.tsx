@@ -70,6 +70,10 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
             <span class="nick-label">{lang === "de" ? "Spitznamen" : "Nicknames"}</span>
             <span class="nick-badge">🤗 Kuschelbacke</span>
             <span class="nick-badge">💥 Bollerkopf</span>
+            <span class="nick-badge">🐭 Meusel</span>
+            <span class="nick-badge">🐭 Maus</span>
+            <span class="nick-badge">🎩 Mister</span>
+            <span class="nick-badge">🎻 Theolinski</span>
           </div>
 
           <div class="info">
