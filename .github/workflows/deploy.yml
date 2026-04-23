@@ -25,3 +25,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            THEO_EMAIL
+            THEO_PHONE
+        env:
+          THEO_EMAIL: ${{ secrets.THEO_EMAIL }}
+          THEO_PHONE: ${{ secrets.THEO_PHONE }}

@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "theo-badge"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "15905aeb-256d-4312-8d3a-13a23b4bddaf"
 
 [[r2_buckets]]
 binding = "IMAGES"
