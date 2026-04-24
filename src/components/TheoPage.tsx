@@ -64,7 +64,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
             <a href="?lang=en" class={lang === "en" ? "active" : ""}>EN</a>
           </div>
 
-          <ImageGallery heroKey={heroKey} thumbKeys={thumbKeys} imgAlt={t.imgAlt(name)} />
+          <ImageGallery heroKey={heroKey} thumbKeys={thumbKeys} imgAlt={t.imgAlt(name)} photoHint={t.photoHint} />
 
           <div class="nicknames">
             <span class="nick-label">{lang === "de" ? "Spitznamen" : "Nicknames"}</span>

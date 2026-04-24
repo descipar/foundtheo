@@ -169,6 +169,15 @@ export const pageStyles = `
   }
   .thumbs img:hover { opacity: 0.8; }
 
+  /* ── Photo hint ── */
+  .photo-hint {
+    font-size: 0.68rem;
+    color: #aaa;
+    text-align: center;
+    padding: 0.4rem 1rem 0.1rem;
+    letter-spacing: 0.02em;
+  }
+
   /* ── Nicknames ── */
   .nicknames {
     display: flex;

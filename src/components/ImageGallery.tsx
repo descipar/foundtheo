@@ -4,9 +4,10 @@ interface Props {
   heroKey: string | undefined;
   thumbKeys: string[];
   imgAlt: string;
+  photoHint: string;
 }
 
-export function ImageGallery({ heroKey, thumbKeys, imgAlt }: Props) {
+export function ImageGallery({ heroKey, thumbKeys, imgAlt, photoHint }: Props) {
   return (
     <>
       {/* Hero image */}
@@ -32,6 +33,9 @@ export function ImageGallery({ heroKey, thumbKeys, imgAlt }: Props) {
           ))}
         </div>
       )}
+
+      {/* Photo hint */}
+      <p class="photo-hint">{photoHint}</p>
 
       {/* Lightbox */}
       <div class="lightbox" id="lightbox" onclick="closeLightbox()">

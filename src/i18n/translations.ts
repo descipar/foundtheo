@@ -19,6 +19,7 @@ export const translations = {
       return parts.join(", ");
     },
     imgAlt: (name: string) => `Foto von ${name}`,
+    photoHint: "📸 Zufällige Auswahl aus dem Fotoalbum – bei jedem Aufruf neu",
   },
   en: {
     pageTitle: (name: string) => `Found ${name}! 🐾`,
@@ -38,6 +39,7 @@ export const translations = {
       return parts.join(", ");
     },
     imgAlt: (name: string) => `Photo of ${name}`,
+    photoHint: "📸 Random selection from the photo album – different on every visit",
   },
 } as const satisfies Record<Lang, object>;
 
