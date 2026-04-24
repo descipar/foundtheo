@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { theoRoutes } from "./routes/theo";
 import { imageRoutes } from "./routes/images";
 import { adminRoutes } from "./routes/admin";
-import { serveStatic } from "hono/cloudflare-workers";
 
 export interface Bindings {
   DB: D1Database;
@@ -34,8 +33,8 @@ app.route("/theo", theoRoutes);
 app.route("/api/images", imageRoutes);
 app.route("/admin", adminRoutes);
 
-// Statische Assets (Logos etc.) aus public/
-app.use("/public/*", serveStatic({ root: "./" }));
+// TODO: Logos unter /public/logos/ einbinden sobald SVG-Dateien vorhanden sind.
+// Dann: import { serveStatic } from "hono/cloudflare-workers" + [site] in wrangler.toml
 
 // Robots.txt – alle Crawler sperren
 app.get("/robots.txt", (c) =>
