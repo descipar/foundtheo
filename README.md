@@ -20,8 +20,9 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 - Badge-Themes: adesso, Nemetschek, Standard – per Klick wechselbar
 - Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
 - Foto-Galerie mit Lightbox
+- Like-Funktion pro Bild – Heart-Overlay mit Zähler, Doppel-Like via localStorage verhindert
 - Automatischer Foto-Upload mit Personenerkennung (YOLO)
-- Admin-Interface unter `/admin` mit Scan-Statistiken (passwortgeschützt)
+- Admin-Interface unter `/admin` mit Scan-Statistiken und Like-Verwaltung (passwortgeschützt)
 
 ---
 
@@ -116,6 +117,8 @@ Zeigt: Scan-Gesamtzahl, Aufschlüsselung nach Badge und Quelle (QR vs. Direkt), 
 Geo-Daten (Land, Stadt) werden automatisch aus Cloudflares Request-Metadaten gespeichert – ohne Personenbezug, nur IP-Hash wird hinterlegt.
 
 Scans können direkt im Admin-Interface gelöscht werden – entweder alle auf einmal oder gefiltert nach Badge-Typ (adesso, nemetschek, direct).
+
+Alle Like-Zähler lassen sich ebenfalls per Klick im Admin zurücksetzen. Neu hochgeladene Bilder starten automatisch bei 0 – kein manuelles Eingreifen nötig.
 
 ```bash
 # Passwort einmalig in Produktion setzen

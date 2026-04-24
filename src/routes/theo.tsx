@@ -4,6 +4,7 @@ import { getCookie, setCookie } from "hono/cookie";
 import { TheoPage } from "../components/TheoPage";
 import { calcAge } from "../utils/calcAge";
 import { recordScan, getScanStats } from "../db/scans";
+import { getLikes } from "../db/likes";
 import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
 import { getTheme } from "../themes";
@@ -55,9 +56,10 @@ async function renderPage(
     });
   }
 
-  const [allKeys, stats] = await Promise.all([
+  const [allKeys, stats, imageLikes] = await Promise.all([
     listImageKeys(env.IMAGES),
     getScanStats(env.DB, "theo"),
+    getLikes(env.DB),
   ]);
 
   const selectedKeys = pickImages(allKeys);
@@ -81,6 +83,7 @@ async function renderPage(
       theme={theme}
       lang={detectedLang}
       stats={stats}
+      imageLikes={imageLikes}
     />
   );
 }

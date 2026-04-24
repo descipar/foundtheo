@@ -25,9 +25,11 @@ interface Props {
   theme: BadgeTheme;
   lang: Lang;
   stats: ScanStats;
+  /** Like-Zähler pro Bild-Key: { [image_key]: count } */
+  imageLikes: Record<string, number>;
 }
 
-export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, theme, lang, stats }: Props) {
+export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, theme, lang, stats, imageLikes }: Props) {
   const t = translations[lang];
   const ageText = t.age(ageYears, ageMonths, ageDays);
   const [heroKey, ...thumbKeys] = imageKeys;
@@ -64,7 +66,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
             <a href="?lang=en" class={lang === "en" ? "active" : ""}>EN</a>
           </div>
 
-          <ImageGallery heroKey={heroKey} thumbKeys={thumbKeys} imgAlt={t.imgAlt(name)} photoHint={t.photoHint} />
+          <ImageGallery heroKey={heroKey} thumbKeys={thumbKeys} imgAlt={t.imgAlt(name)} photoHint={t.photoHint} imageLikes={imageLikes} />
 
           <div class="nicknames">
             <span class="nick-label">{lang === "de" ? "Spitznamen" : "Nicknames"}</span>
@@ -104,6 +106,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
           <CardFooter theme={theme} />
         </div>
 
+        <script dangerouslySetInnerHTML={{ __html: `var IMAGE_LIKES = ${JSON.stringify(imageLikes)};` }} />
         <script dangerouslySetInnerHTML={{ __html: clientScript }} />
       </body>
     </html>

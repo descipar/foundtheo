@@ -114,6 +114,22 @@ function DeletePanel({ badges }: { badges: string[] }) {
   );
 }
 
+/** Formular zum Zurücksetzen aller Like-Zähler */
+function LikesPanel() {
+  return (
+    <div class="panel panel--danger">
+      <h2>Likes zurücksetzen</h2>
+      <div class="delete-row">
+        <form method="post" action="/admin/reset-likes" class="delete-form"
+          onsubmit="return confirm('Alle Like-Zähler auf 0 zurücksetzen?')">
+          <button type="submit" class="btn btn--warning">❤️ Alle Likes löschen</button>
+        </form>
+      </div>
+      <p class="panel--hint">Neue Bilder starten automatisch bei 0 – kein manuelles Eingreifen nötig.</p>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export function AdminPage({ stats, deletedMsg }: Props) {
@@ -232,6 +248,9 @@ export function AdminPage({ stats, deletedMsg }: Props) {
 
         {/* Scan-Verwaltung – immer alle Badge-Typen anzeigen */}
         <DeletePanel badges={["adesso", "nemetschek", "direct"]} />
+
+        {/* Like-Verwaltung */}
+        <LikesPanel />
 
       </body>
     </html>

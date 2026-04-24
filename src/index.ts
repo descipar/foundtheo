@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { theoRoutes } from "./routes/theo";
 import { imageRoutes } from "./routes/images";
 import { adminRoutes } from "./routes/admin";
+import { likesRoutes } from "./routes/likes";
 
 export interface Bindings {
   DB: D1Database;
@@ -31,6 +32,7 @@ app.use("*", async (c, next) => {
 
 app.route("/theo", theoRoutes);
 app.route("/api/images", imageRoutes);
+app.route("/api/like", likesRoutes);
 app.route("/admin", adminRoutes);
 
 // TODO: Logos unter /public/logos/ einbinden sobald SVG-Dateien vorhanden sind.

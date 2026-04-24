@@ -2,6 +2,7 @@
 import { Hono } from "hono";
 import { AdminPage } from "../components/AdminPage";
 import { getAdminStats, deleteScans } from "../db/scans";
+import { resetLikes } from "../db/likes";
 import type { Bindings } from "../index";
 
 export const adminRoutes = new Hono<{ Bindings: Bindings }>();
@@ -61,6 +62,16 @@ adminRoutes.post("/delete", async (c) => {
     : `Alle ${deleted} Scans gelöscht.`;
 
   // Nach dem Löschen zurück zum Dashboard mit Bestätigungsmeldung
+  return c.redirect(`/admin?deleted=${encodeURIComponent(message)}`);
+});
+
+/** POST /admin/reset-likes – Alle Like-Zähler auf 0 zurücksetzen */
+adminRoutes.post("/reset-likes", async (c) => {
+  if (!checkAuth(c.req.header("authorization"), c.env.ADMIN_PASSWORD)) {
+    return unauthorized();
+  }
+  const deleted = await resetLikes(c.env.DB);
+  const message = `${deleted} Like-Einträge zurückgesetzt.`;
   return c.redirect(`/admin?deleted=${encodeURIComponent(message)}`);
 });
 

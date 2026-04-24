@@ -5,31 +5,37 @@ interface Props {
   thumbKeys: string[];
   imgAlt: string;
   photoHint: string;
+  /** Like-Zähler pro Bild-Key: { [image_key]: count } */
+  imageLikes: Record<string, number>;
 }
 
-export function ImageGallery({ heroKey, thumbKeys, imgAlt, photoHint }: Props) {
+export function ImageGallery({ heroKey, thumbKeys, imgAlt, photoHint, imageLikes }: Props) {
   return (
     <>
-      {/* Hero image */}
+      {/* Hero image – mit Like-Wrapper */}
       {heroKey && (
-        <img
-          class="hero"
-          src={`/api/images/${encodeURIComponent(heroKey)}`}
-          alt={imgAlt}
-          onclick="openLightbox(this.src)"
-        />
+        <div class="img-like-wrapper" data-img-key={heroKey} data-like-count={imageLikes[heroKey] ?? 0}>
+          <img
+            class="hero"
+            src={`/api/images/${encodeURIComponent(heroKey)}`}
+            alt={imgAlt}
+            onclick="openLightbox(this.src)"
+          />
+        </div>
       )}
 
-      {/* Thumbnails */}
+      {/* Thumbnails – jedes in einem Like-Wrapper */}
       {thumbKeys.length > 0 && (
         <div class="thumbs">
           {thumbKeys.map((key) => (
-            <img
-              src={`/api/images/${encodeURIComponent(key)}`}
-              alt={imgAlt}
-              loading="lazy"
-              onclick="openLightbox(this.src)"
-            />
+            <div class="img-like-wrapper" data-img-key={key} data-like-count={imageLikes[key] ?? 0}>
+              <img
+                src={`/api/images/${encodeURIComponent(key)}`}
+                alt={imgAlt}
+                loading="lazy"
+                onclick="openLightbox(this.src)"
+              />
+            </div>
           ))}
         </div>
       )}

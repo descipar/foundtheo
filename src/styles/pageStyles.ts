@@ -158,16 +158,21 @@ export const pageStyles = `
     padding: 3px;
     background: #dde8f0;
   }
-  .thumbs img {
+  /* Direkte img-Kinder (Fallback, falls kein Wrapper) und Wrapper-Divs als Grid-Items */
+  .thumbs > img,
+  .thumbs > .img-like-wrapper {
+    display: block;
+    overflow: hidden;
+  }
+  .thumbs > img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: contain;
     background: #f0f4f8;
-    display: block;
     cursor: zoom-in;
     transition: opacity 0.15s;
   }
-  .thumbs img:hover { opacity: 0.8; }
+  .thumbs > img:hover { opacity: 0.8; }
 
   /* ── Photo hint ── */
   .photo-hint {
@@ -293,6 +298,56 @@ export const pageStyles = `
     transition: color 0.15s;
   }
   .card-footer-admin:hover { color: rgba(255,255,255,0.8); }
+
+  /* ── Like-Button (Heart-Overlay) ── */
+  .img-like-wrapper {
+    position: relative;
+    display: block;
+  }
+  /* Innerhalb des Thumbs-Grids soll das Wrapper-Div wie ein Grid-Item wirken */
+  .thumbs .img-like-wrapper {
+    display: block;
+    overflow: hidden;
+  }
+  .thumbs .img-like-wrapper img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    background: #f0f4f8;
+    display: block;
+    cursor: zoom-in;
+    transition: opacity 0.15s;
+  }
+  .thumbs .img-like-wrapper img:hover { opacity: 0.8; }
+  .like-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 3px 7px 3px 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, transform 0.15s;
+    line-height: 1;
+  }
+  .like-btn:hover { background: rgba(0, 0, 0, 0.65); transform: scale(1.08); }
+  .like-btn.liked   { background: rgba(220, 38, 38, 0.75); }
+  .like-heart { font-size: 0.95rem; transition: transform 0.2s; display: inline-block; }
+  .like-btn.pop .like-heart { animation: heartpop 0.35s ease; }
+  @keyframes heartpop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.6); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
 
   /* ── Lightbox ── */
   .lightbox {

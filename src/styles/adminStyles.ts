@@ -163,6 +163,11 @@ export const adminStyles = `
   .btn--danger:hover { background: #c53030; }
   .btn--warning { background: #f6ad55; color: #7b341e; }
   .btn--warning:hover { background: #ed8936; color: #fff; }
+  .panel--hint {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 0.6rem;
+  }
 
   /* ── Bar chart ── */
   .bar-row {

@@ -19,6 +19,10 @@ const migrations = [
   `ALTER TABLE scans ADD COLUMN source  TEXT NOT NULL DEFAULT 'qr'`,
   `ALTER TABLE scans ADD COLUMN country TEXT`,
   `ALTER TABLE scans ADD COLUMN city    TEXT`,
+  `CREATE TABLE IF NOT EXISTS image_likes (
+     image_key TEXT    PRIMARY KEY,
+     cnt       INTEGER NOT NULL DEFAULT 0
+   )`,
 ];
 
 // Run once before all tests in this project
