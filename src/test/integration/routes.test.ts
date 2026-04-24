@@ -107,6 +107,31 @@ describe("GET /api/images/:key – Sicherheitscheck", () => {
   });
 });
 
+describe("GET /theo/badges", () => {
+  it("gibt 200 zurück", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/badges"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(200);
+  });
+
+  it("gibt HTML-Content zurück", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/badges"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    const ct = res.headers.get("content-type") ?? "";
+    expect(ct).toContain("text/html");
+  });
+
+  it("wird nicht als Badge-ID behandelt (kein 404)", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/badges"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    // 'badges' darf nicht in den /:badge-Handler fallen und 404 liefern
+    expect(res.status).not.toBe(404);
+  });
+});
+
 describe("GET /robots.txt", () => {
   it("verbietet allen Crawlern den Zugriff", async () => {
     const ctx = createExecutionContext();
