@@ -37,6 +37,25 @@ export async function incrementLike(
 }
 
 /**
+ * Verringert den Like-Zähler für einen Image-Key um 1 (Minimum: 0).
+ * Gibt den neuen Zählerstand zurück. Tut nichts, wenn der Key unbekannt ist.
+ */
+export async function decrementLike(
+  db: D1Database,
+  imageKey: string
+): Promise<number> {
+  const row = await db
+    .prepare(
+      `UPDATE image_likes SET cnt = MAX(0, cnt - 1)
+       WHERE image_key = ?
+       RETURNING cnt`
+    )
+    .bind(imageKey)
+    .first<{ cnt: number }>();
+  return row?.cnt ?? 0;
+}
+
+/**
  * Setzt alle Like-Zähler zurück (löscht alle Zeilen).
  * Neue Bilder starten danach automatisch wieder bei 0.
  */
