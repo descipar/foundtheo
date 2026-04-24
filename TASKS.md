@@ -2,10 +2,11 @@
 
 ## 🟡 Offen
 
-- [ ] Optional: Zusätzliche Route für Badge-Übersicht (z.B. `/theo/badges`) mit Links zu den einzelnen Badges
+_(keine offenen Punkte)_
 
 ## ✅ Erledigt
 
+- [x] Badge-Übersicht unter `/theo/badges`: Karten für alle Badge-Typen mit Theme-Farben und Live-Scan-Zählern, Links zu den einzelnen Badge-Seiten
 - [x] Image-Like-Feature: Heart-Overlay auf jedem Bild, Like-Zähler per D1 (`image_likes`-Tabelle), Toggle (Like/Unlike) per localStorage, rein optimistisches Update (kein inflight-Lock), Admin-Reset-Button, neue Bilder starten automatisch bei 0
 - [x] Admin-Interface: Delete-Buttons immer für alle Badge-Typen sichtbar (adesso, nemetschek, direct) – unabhängig von vorhandenen Scan-Daten
 - [x] Admin-Interface: CSS in eigene Datei `adminStyles.ts` ausgelagert, keine Inline-Styles mehr in AdminPage

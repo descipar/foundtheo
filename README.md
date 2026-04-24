@@ -18,6 +18,7 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 
 - Mehrsprachig (DE/EN) – automatische Spracherkennung via URL-Parameter
 - Badge-Themes: adesso, Nemetschek, Standard – per Klick wechselbar
+- Badge-Übersicht unter `/theo/badges` mit Karten für alle Badge-Typen und Live-Scan-Zählern
 - Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
 - Foto-Galerie mit Lightbox
 - Like-Funktion pro Bild – Heart-Overlay mit Zähler, Toggle (Like/Unlike) via localStorage, optimistisches Update ohne Wartezeit
