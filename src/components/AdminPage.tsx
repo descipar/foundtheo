@@ -1,5 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import type { AdminStats } from "../db/scans";
+import { themes } from "../themes";
 import { adminStyles } from "../styles/adminStyles";
 
 interface Props {
@@ -17,11 +18,9 @@ function countryFlag(code: string): string {
   return COUNTRY_FLAGS[code] ?? "🌍";
 }
 
+/** Liest den Anzeigenamen aus themes.ts – keine doppelte Pflege nötig */
 function badgeLabel(id: string): string {
-  if (id === "adesso")     return "🔵 adesso";
-  if (id === "nemetschek") return "🟦 Nemetschek";
-  if (id === "direct")     return "🌐 Direkt";
-  return id;
+  return themes[id]?.badgeLabel ?? id;
 }
 
 // ── Sub-Components ────────────────────────────────────────────────────────────

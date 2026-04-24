@@ -4,9 +4,14 @@ import type { Bindings } from "../index";
 
 export const likesRoutes = new Hono<{ Bindings: Bindings }>();
 
-/** Sicherheitscheck: Nur Keys mit Präfix "dogs/" erlauben */
+/**
+ * Sicherheitscheck: Nur wohlgeformte Image-Keys erlauben.
+ * Erlaubt: dogs/theo/foto.jpg, dogs/theo/bild-01.png
+ * Verhindert: Path-Traversal (dogs/../etc/passwd), beliebige Strings
+ */
 function isValidKey(key: string): boolean {
-  return key.startsWith("dogs/");
+  return /^dogs\/[a-zA-Z0-9_\-./]+\.(jpg|jpeg|png|webp|avif)$/i.test(key)
+    && !key.includes("..");
 }
 
 /**

@@ -58,8 +58,14 @@ export async function decrementLike(
 /**
  * Setzt alle Like-Zähler zurück (löscht alle Zeilen).
  * Neue Bilder starten danach automatisch wieder bei 0.
+ * Wirft bei DB-Fehler – konsistent mit dem Error-Handling in den Routes.
  */
 export async function resetLikes(db: D1Database): Promise<number> {
-  const result = await db.prepare("DELETE FROM image_likes").run();
-  return result.meta.changes ?? 0;
+  try {
+    const result = await db.prepare("DELETE FROM image_likes").run();
+    return result.meta.changes ?? 0;
+  } catch (err) {
+    console.error("resetLikes: DB-Fehler", err);
+    throw new Error("Likes konnten nicht zurückgesetzt werden");
+  }
 }
