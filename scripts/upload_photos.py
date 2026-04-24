@@ -46,11 +46,22 @@ IMAGE_EXTS_CONVERT = {".heic", ".heif"}                                   # Werd
 IMAGE_EXTS_SKIP    = {".tiff", ".tif", ".bmp", ".raw",                    # Nicht web-kompatibel, kein Support
                       ".cr2", ".nef", ".arw", ".dng", ".orf", ".rw2"}
 
-# R2 S3-API Credentials (für zuverlässiges Listing)
+# R2 S3-API Credentials – werden aus scripts/.env geladen (niemals committen!)
 # Cloudflare Dashboard → R2 → "Manage R2 API Tokens" → "Create API Token"
-R2_ACCOUNT_ID   = ""   # z.B. "abc123def456..."
-R2_ACCESS_KEY   = ""   # Access Key ID
-R2_SECRET_KEY   = ""   # Secret Access Key
+def _load_env():
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
+_load_env()
+R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "")
+R2_ACCESS_KEY = os.environ.get("R2_ACCESS_KEY", "")
+R2_SECRET_KEY = os.environ.get("R2_SECRET_KEY", "")
+R2_ENDPOINT   = os.environ.get("R2_ENDPOINT",
+                    f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com")
 
 SCRIPTS_DIR = Path(__file__).parent
 
@@ -211,12 +222,14 @@ def get_r2_client():
         print("❌  R2 API Credentials fehlen im Script (R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY).")
         print("    Cloudflare Dashboard → R2 → 'Manage R2 API Tokens' → 'Create API Token'")
         sys.exit(1)
+    from botocore.config import Config
     return boto3.client(
         "s3",
-        endpoint_url=f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+        endpoint_url=R2_ENDPOINT,
         aws_access_key_id=R2_ACCESS_KEY,
         aws_secret_access_key=R2_SECRET_KEY,
         region_name="auto",
+        config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
     )
 
 def get_existing_keys() -> set[str]:
@@ -266,7 +279,10 @@ def main():
 
     # ── Modus: preview_upload/ direkt hochladen ───────────────────────────────
     if args.upload_preview:
-        preview_dir = SCRIPTS_DIR.parent / "preview_upload"
+        # Suche preview_upload: erst in photos/, dann im Projektroot
+        photos_subdir = SCRIPTS_DIR.parent / "photos" / "preview_upload"
+        root_subdir   = SCRIPTS_DIR.parent / "preview_upload"
+        preview_dir   = photos_subdir if photos_subdir.exists() else root_subdir
         if not preview_dir.exists() or not any(preview_dir.iterdir()):
             print(f"❌  Keine Bilder in {preview_dir} gefunden.")
             print("    Zuerst --dry-run ausführen und Bilder manuell prüfen.")

@@ -14,8 +14,10 @@ dist/
 
 # Foto-Upload Script
 photos/
+scripts/.env
 scripts/google_credentials.json
 scripts/google_token.json
+yolov8n.pt
 
 # macOS
 .DS_Store
