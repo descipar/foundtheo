@@ -84,6 +84,20 @@ export interface AdminStats {
   bySource: { source: string; cnt: number }[];
 }
 
+/**
+ * Löscht Scans – entweder alle oder nur für einen bestimmten Badge.
+ * Gibt die Anzahl der gelöschten Zeilen zurück.
+ */
+export async function deleteScans(
+  db: D1Database,
+  badgeId?: string
+): Promise<number> {
+  const result = badgeId
+    ? await db.prepare("DELETE FROM scans WHERE badge_id = ?").bind(badgeId).run()
+    : await db.prepare("DELETE FROM scans").run();
+  return result.meta.changes ?? 0;
+}
+
 /** Leerer Fallback für den Fall eines DB-Fehlers */
 const EMPTY_ADMIN_STATS: AdminStats = {
   totalScans: 0,

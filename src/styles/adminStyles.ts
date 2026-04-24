@@ -15,7 +15,7 @@ export const adminStyles = `
   /* ── Header ── */
   .admin-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 1.5rem;
   }
@@ -24,12 +24,38 @@ export const adminStyles = `
     font-weight: 800;
     color: #1A3C6B;
   }
+  .admin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .admin-link {
+    font-size: 0.75rem;
+    color: #1A3C6B;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .admin-link:hover { text-decoration: underline; }
   .admin-logout {
     font-size: 0.75rem;
     color: #aaa;
     text-decoration: none;
   }
   .admin-logout:hover { color: #555; }
+
+  /* ── Alert ── */
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .alert--success {
+    background: #e6f4ea;
+    color: #1e6e36;
+    border: 1px solid #b7dfc4;
+  }
 
   /* ── Section headings ── */
   h2 {
@@ -115,6 +141,28 @@ export const adminStyles = `
     font-weight: 700;
     color: #1A3C6B;
   }
+
+  /* ── Danger panel (Scan-Verwaltung) ── */
+  .panel--danger { border: 1px solid #fcd5d5; }
+  .delete-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .delete-form { margin: 0; }
+  .btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn--danger { background: #e53e3e; color: #fff; }
+  .btn--danger:hover { background: #c53030; }
+  .btn--warning { background: #f6ad55; color: #7b341e; }
+  .btn--warning:hover { background: #ed8936; color: #fff; }
 
   /* ── Bar chart ── */
   .bar-row {

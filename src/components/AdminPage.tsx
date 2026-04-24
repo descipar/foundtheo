@@ -4,6 +4,7 @@ import { adminStyles } from "../styles/adminStyles";
 
 interface Props {
   stats: AdminStats;
+  deletedMsg: string | null;
 }
 
 /** ISO 3166-1 Alpha-2 → Emoji-Flagge */
@@ -86,10 +87,38 @@ function StatsTable({
   );
 }
 
+/** Formular zum Löschen von Scans – alle oder nach Badge */
+function DeletePanel({ badges }: { badges: string[] }) {
+  return (
+    <div class="panel panel--danger">
+      <h2>Scans löschen</h2>
+      <div class="delete-row">
+        {/* Alle löschen */}
+        <form method="post" action="/admin/delete" class="delete-form"
+          onsubmit="return confirm('Wirklich ALLE Scans löschen?')">
+          <button type="submit" class="btn btn--danger">Alle löschen</button>
+        </form>
+
+        {/* Nach Badge löschen */}
+        {badges.map((badge) => (
+          <form method="post" action="/admin/delete" class="delete-form"
+            onsubmit={`return confirm('Alle Scans für „${badge}" löschen?')`}>
+            <input type="hidden" name="badge_id" value={badge} />
+            <button type="submit" class="btn btn--warning">
+              {badgeLabel(badge)} löschen
+            </button>
+          </form>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export function AdminPage({ stats }: Props) {
+export function AdminPage({ stats, deletedMsg }: Props) {
   const topCountry = stats.topCountries[0];
+  const knownBadges = stats.byBadge.map((b) => b.badge_id);
 
   const badgeRows = stats.byBadge.map((b) => ({
     badge: badgeLabel(b.badge_id),
@@ -123,8 +152,16 @@ export function AdminPage({ stats }: Props) {
 
         <div class="admin-header">
           <h1>🐾 foundtheo Admin</h1>
-          <a class="admin-logout" href="/admin/logout">Abmelden</a>
+          <div class="admin-header-actions">
+            <a class="admin-link" href="/">← Zur Hauptseite</a>
+            <a class="admin-logout" href="/admin/logout">Abmelden</a>
+          </div>
         </div>
+
+        {/* Bestätigungsmeldung nach Löschvorgang */}
+        {deletedMsg && (
+          <div class="alert alert--success">{deletedMsg}</div>
+        )}
 
         {/* Kennzahlen */}
         <div class="stat-grid">
@@ -193,6 +230,9 @@ export function AdminPage({ stats }: Props) {
             />
           </div>
         </div>
+
+        {/* Scan-Verwaltung */}
+        <DeletePanel badges={knownBadges} />
 
       </body>
     </html>

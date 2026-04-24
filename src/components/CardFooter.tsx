@@ -18,6 +18,7 @@ export function CardFooter({ theme }: Props) {
         />
       </div>
       <div class="card-footer-paw">🐾</div>
+      <a class="card-footer-admin" href="/admin" title="Admin">⚙</a>
     </div>
   );
 }

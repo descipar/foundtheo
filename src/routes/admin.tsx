@@ -1,7 +1,7 @@
 /** @jsxImportSource hono/jsx */
 import { Hono } from "hono";
 import { AdminPage } from "../components/AdminPage";
-import { getAdminStats } from "../db/scans";
+import { getAdminStats, deleteScans } from "../db/scans";
 import type { Bindings } from "../index";
 
 export const adminRoutes = new Hono<{ Bindings: Bindings }>();
@@ -21,22 +21,47 @@ function checkAuth(authHeader: string | undefined, password: string): boolean {
   }
 }
 
+/** Hilfsfunktion: 401-Response für fehlende/falsche Auth */
+function unauthorized() {
+  return new Response("Unauthorized", {
+    status: 401,
+    headers: {
+      "WWW-Authenticate": 'Basic realm="foundtheo Admin"',
+      "Content-Type": "text/plain",
+    },
+  });
+}
+
 /** GET /admin – Dashboard */
 adminRoutes.get("/", async (c) => {
-  const authHeader = c.req.header("authorization");
+  if (!checkAuth(c.req.header("authorization"), c.env.ADMIN_PASSWORD)) {
+    return unauthorized();
+  }
+  const stats = await getAdminStats(c.env.DB);
+  const deletedMsg = c.req.query("deleted") ?? null;
+  return c.html(<AdminPage stats={stats} deletedMsg={deletedMsg} />);
+});
 
-  if (!checkAuth(authHeader, c.env.ADMIN_PASSWORD)) {
-    return new Response("Unauthorized", {
-      status: 401,
-      headers: {
-        "WWW-Authenticate": 'Basic realm="foundtheo Admin"',
-        "Content-Type": "text/plain",
-      },
-    });
+/** POST /admin/delete – Scans löschen (alle oder nach Badge) */
+adminRoutes.post("/delete", async (c) => {
+  if (!checkAuth(c.req.header("authorization"), c.env.ADMIN_PASSWORD)) {
+    return unauthorized();
   }
 
-  const stats = await getAdminStats(c.env.DB);
-  return c.html(<AdminPage stats={stats} />);
+  const body = await c.req.formData();
+  const badgeId = body.get("badge_id");
+
+  const deleted = await deleteScans(
+    c.env.DB,
+    typeof badgeId === "string" && badgeId !== "" ? badgeId : undefined
+  );
+
+  const message = badgeId
+    ? `${deleted} Scans für Badge „${badgeId}" gelöscht.`
+    : `Alle ${deleted} Scans gelöscht.`;
+
+  // Nach dem Löschen zurück zum Dashboard mit Bestätigungsmeldung
+  return c.redirect(`/admin?deleted=${encodeURIComponent(message)}`);
 });
 
 /** GET /admin/logout – Browser-Auth vergessen lassen */

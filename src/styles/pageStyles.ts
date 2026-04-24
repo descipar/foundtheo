@@ -285,7 +285,14 @@ export const pageStyles = `
   }
   .card-footer-logo { display: flex; align-items: center; gap: 0.4rem; }
   .card-footer img { height: 18px; filter: brightness(0) invert(1); opacity: 0.9; }
-  .card-footer-paw { font-size: 1rem; opacity: 0.7; }
+  .card-footer-paw { font-size: 1rem; opacity: 0.7; flex: 1; text-align: center; }
+  .card-footer-admin {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .card-footer-admin:hover { color: rgba(255,255,255,0.8); }
 
   /* ── Lightbox ── */
   .lightbox {
