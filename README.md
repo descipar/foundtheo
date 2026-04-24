@@ -137,7 +137,7 @@ Fotos aus einem lokalen Ordner in den R2 Bucket hochladen. YOLO erkennt automati
 ### Setup
 
 ```bash
-pip3 install ultralytics pillow pillow-heif requests tqdm boto3
+pip3 install ultralytics pillow pillow-heif tqdm boto3
 ```
 
 Credentials in `scripts/.env` eintragen (wird nicht committed):
@@ -180,7 +180,6 @@ HEIC/HEIF-Dateien werden automatisch nach JPEG konvertiert.
 | Flag | Beschreibung |
 |------|-------------|
 | `--folder <pfad>` | Lokaler Ordner mit Fotos |
-| `--album <name>` | Google Photos Album (API erforderlich) |
 | `--dry-run` | Nur simulieren, nichts hochladen |
 | `--skip-r2-check` | R2-Prüfung überspringen |
 | `--upload-preview` | Bilder aus `preview_upload/` hochladen |

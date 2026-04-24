@@ -2,37 +2,34 @@
 """
 upload_photos.py – Fotos → Cloudflare R2
 
-Lädt Fotos aus einem lokalen Ordner (Standard) oder einem Google Photos Album,
-prüft ob Personen erkennbar sind, und lädt nur Bilder ohne Menschen in den R2 Bucket.
+Lädt Fotos aus einem lokalen Ordner, prüft ob Personen erkennbar sind,
+und lädt nur Bilder ohne Menschen in den R2 Bucket.
 Bereits vorhandene Bilder werden übersprungen (inkrementeller Upload).
 
 Setup (einmalig):
-    pip3 install ultralytics pillow pillow-heif requests tqdm boto3
+    pip3 install ultralytics pillow pillow-heif tqdm boto3
 
-Für Google Photos (optional, API-Zugriff nötig):
-    pip3 install google-auth-oauthlib google-auth-httplib2
-    1. https://console.cloud.google.com → Neues Projekt anlegen
-    2. APIs & Services → "Photos Library API" aktivieren
-    3. APIs & Services → Credentials → "OAuth 2.0 Client ID" (Desktop App) anlegen
-    4. JSON herunterladen und als scripts/google_credentials.json speichern
-
-Verwendung (lokaler Ordner – empfohlen):
+Verwendung:
     python3 scripts/upload_photos.py --folder ~/Pictures/Theo
     python3 scripts/upload_photos.py --folder ~/Pictures/Theo --dry-run
 
-Verwendung (Google Photos API):
-    python3 scripts/upload_photos.py --album "Theo"
-    python3 scripts/upload_photos.py --album "Theo" --dry-run
+Workflow:
+    1. Dry-run: Bilder prüfen und in Vorschau-Ordner sortieren
+       python3 scripts/upload_photos.py --folder ~/Pictures/Theo --dry-run --skip-r2-check
+       → photos/preview_upload/  – würde hochgeladen (kein Mensch erkannt)
+       → photos/preview_person/  – übersprungen (Mensch erkannt)
+
+    2. Vorschau-Ordner manuell prüfen, ggf. Bilder verschieben
+
+    3. Upload aus preview_upload/
+       python3 scripts/upload_photos.py --upload-preview
 """
 
 import os
 import sys
-import json
 import argparse
-import tempfile
 from pathlib import Path
 
-import requests
 from tqdm import tqdm
 
 # ── Konfiguration ────────────────────────────────────────────────────────────
@@ -43,7 +40,7 @@ CONFIDENCE      = 0.5                   # Mindest-Konfidenz für Personenerkennu
 PERSON_CLASS    = 0                     # COCO Klasse 0 = Person
 IMAGE_EXTS_WEB     = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"}  # Vom Browser darstellbar
 IMAGE_EXTS_CONVERT = {".heic", ".heif"}                                   # Werden zu JPEG konvertiert
-IMAGE_EXTS_SKIP    = {".tiff", ".tif", ".bmp", ".raw",                    # Nicht web-kompatibel, kein Support
+IMAGE_EXTS_SKIP    = {".tiff", ".tif", ".bmp", ".raw",                    # Nicht web-kompatibel
                       ".cr2", ".nef", ".arw", ".dng", ".orf", ".rw2"}
 
 # R2 S3-API Credentials – werden aus scripts/.env geladen (niemals committen!)
@@ -70,7 +67,6 @@ SCRIPTS_DIR = Path(__file__).parent
 def convert_to_jpeg(src: Path, dest_dir: Path) -> Path:
     """Konvertiert HEIC/HEIF zu JPEG. Gibt den Pfad zur konvertierten Datei zurück."""
     try:
-        # pillow-heif registriert HEIC-Support in Pillow
         import pillow_heif
         pillow_heif.register_heif_opener()
     except ImportError:
@@ -121,93 +117,6 @@ def list_local_photos(folder: Path, convert_dir: Path | None = None) -> list[Pat
 
     return sorted(photos, key=lambda f: f.name)
 
-# ── Google Photos (optional) ─────────────────────────────────────────────────
-
-def get_google_photos(album_name: str) -> list[dict]:
-    """Lädt Fotos via Google Photos API (benötigt google-auth-oauthlib)."""
-    try:
-        from google.auth.transport.requests import Request
-        from google.oauth2.credentials import Credentials
-        from google_auth_oauthlib.flow import InstalledAppFlow
-    except ImportError:
-        print("❌  Google Auth Bibliotheken nicht installiert.")
-        print("    pip3 install google-auth-oauthlib google-auth-httplib2")
-        sys.exit(1)
-
-    CREDENTIALS_FILE = SCRIPTS_DIR / "google_credentials.json"
-    TOKEN_FILE       = SCRIPTS_DIR / "google_token.json"
-    SCOPES           = ["https://www.googleapis.com/auth/photoslibrary.readonly"]
-
-    # Auth
-    creds = None
-    if TOKEN_FILE.exists():
-        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
-        if creds and creds.scopes and not all(s in creds.scopes for s in SCOPES):
-            creds = None
-            TOKEN_FILE.unlink()
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            if not CREDENTIALS_FILE.exists():
-                print(f"❌  {CREDENTIALS_FILE} nicht gefunden.")
-                sys.exit(1)
-            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
-            creds = flow.run_local_server(port=0)
-        TOKEN_FILE.write_text(creds.to_json())
-
-    headers = {"Authorization": f"Bearer {creds.token}"}
-
-    # Album suchen
-    album_id = None
-    page_token = None
-    while True:
-        params = {"pageSize": 50}
-        if page_token:
-            params["pageToken"] = page_token
-        resp = requests.get(
-            "https://photoslibrary.googleapis.com/v1/albums",
-            headers=headers, params=params
-        )
-        if resp.status_code != 200:
-            print(f"❌  Google Photos API Fehler {resp.status_code}: {resp.text}")
-            sys.exit(1)
-        data = resp.json()
-        for album in data.get("albums", []):
-            if album.get("title") == album_name:
-                album_id = album["id"]
-                break
-        if album_id or not data.get("nextPageToken"):
-            break
-        page_token = data["nextPageToken"]
-
-    if not album_id:
-        print(f"❌  Album '{album_name}' nicht gefunden.")
-        sys.exit(1)
-
-    # Fotos laden
-    photos = []
-    page_token = None
-    while True:
-        body: dict = {"albumId": album_id, "pageSize": 100}
-        if page_token:
-            body["pageToken"] = page_token
-        resp = requests.post(
-            "https://photoslibrary.googleapis.com/v1/mediaItems:search",
-            headers=headers, json=body
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        for item in data.get("mediaItems", []):
-            if item.get("mimeType", "").startswith("image/"):
-                photos.append(item)
-        page_token = data.get("nextPageToken")
-        if not page_token:
-            break
-
-    return photos
-
 # ── R2 Bucket ────────────────────────────────────────────────────────────────
 
 def get_r2_client():
@@ -219,7 +128,7 @@ def get_r2_client():
         print("    pip3 install boto3")
         sys.exit(1)
     if not R2_ACCOUNT_ID or not R2_ACCESS_KEY or not R2_SECRET_KEY:
-        print("❌  R2 API Credentials fehlen im Script (R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY).")
+        print("❌  R2 API Credentials fehlen (R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY).")
         print("    Cloudflare Dashboard → R2 → 'Manage R2 API Tokens' → 'Create API Token'")
         sys.exit(1)
     from botocore.config import Config
@@ -268,18 +177,15 @@ def has_person(model, image_path: Path) -> bool:
 # ── Hauptprogramm ────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Fotos → R2 Upload (lokal oder Google Photos)")
-    source = parser.add_mutually_exclusive_group(required=False)
-    source.add_argument("--folder", type=Path, help="Lokaler Ordner mit Fotos (empfohlen)")
-    source.add_argument("--album",  help="Google Photos Album-Name")
-    parser.add_argument("--dry-run",       action="store_true", help="Nur simulieren, nichts hochladen")
-    parser.add_argument("--skip-r2-check", action="store_true", help="R2-Prüfung überspringen, alle Bilder verarbeiten")
-    parser.add_argument("--upload-preview", action="store_true", help="Bilder aus preview_upload/ direkt in R2 hochladen (nach manuellem Review)")
+    parser = argparse.ArgumentParser(description="Fotos aus lokalem Ordner → R2 Upload")
+    parser.add_argument("--folder",         type=Path, help="Lokaler Ordner mit Fotos")
+    parser.add_argument("--dry-run",        action="store_true", help="Nur simulieren, nichts hochladen")
+    parser.add_argument("--skip-r2-check",  action="store_true", help="R2-Prüfung überspringen")
+    parser.add_argument("--upload-preview", action="store_true", help="Bilder aus preview_upload/ in R2 hochladen (nach manuellem Review)")
     args = parser.parse_args()
 
     # ── Modus: preview_upload/ direkt hochladen ───────────────────────────────
     if args.upload_preview:
-        # Suche preview_upload: erst in photos/, dann im Projektroot
         photos_subdir = SCRIPTS_DIR.parent / "photos" / "preview_upload"
         root_subdir   = SCRIPTS_DIR.parent / "preview_upload"
         preview_dir   = photos_subdir if photos_subdir.exists() else root_subdir
@@ -320,20 +226,18 @@ def main():
 """)
         sys.exit(0)
 
-    if not args.folder and not args.album:
+    if not args.folder:
         parser.print_help()
-        print("\n💡  Tipp: Fotos aus Google Photos exportieren und --folder verwenden:\n"
-              "    python3 scripts/upload_photos.py --folder ~/Pictures/Theo --dry-run")
         sys.exit(0)
 
     uploaded = skipped_person = skipped_existing = errors = 0
 
-    # Dry-run Vorschau-Ordner vorbereiten (vorher löschen für sauberen Stand)
+    # Dry-run Vorschau-Ordner vorbereiten
     dry_run_ok     = None
     dry_run_person = None
     if args.dry_run:
         import shutil
-        base = args.folder.expanduser().resolve() if args.folder else SCRIPTS_DIR
+        base = args.folder.expanduser().resolve()
         dry_run_ok     = base / "preview_upload"
         dry_run_person = base / "preview_person"
         for d in (dry_run_ok, dry_run_person):
@@ -354,6 +258,15 @@ def main():
 
     print("🤖  YOLO-Modell laden...")
     model = load_model()
+
+    folder = args.folder.expanduser().resolve()
+    if not folder.exists():
+        print(f"❌  Ordner nicht gefunden: {folder}")
+        sys.exit(1)
+
+    photos_local = list_local_photos(folder)
+    print(f"📁  {len(photos_local)} Bilder in {folder}")
+    print("\n🚀  Verarbeitung startet...\n")
 
     def process_photo(photo_path: Path, key: str) -> None:
         nonlocal uploaded, skipped_person, skipped_existing, errors
@@ -392,44 +305,10 @@ def main():
                 tqdm.write(f"❌  {filename} – Upload-Fehler: {e}")
                 errors += 1
 
-    if args.folder:
-        # ── Lokaler Ordner ──
-        folder = args.folder.expanduser().resolve()
-        if not folder.exists():
-            print(f"❌  Ordner nicht gefunden: {folder}")
-            sys.exit(1)
-        photos_local = list_local_photos(folder)
-        print(f"📁  {len(photos_local)} Bilder in {folder}")
-        print("\n🚀  Verarbeitung startet...\n")
-
-        bar = tqdm(photos_local, unit="Foto", ncols=80, colour="green")
-        for photo_path in bar:
-            bar.set_description(f"{photo_path.name[:30]:<30}")
-            process_photo(photo_path, f"{R2_PREFIX}{photo_path.name}")
-
-    else:
-        # ── Google Photos API ──
-        print(f"📚  Google Photos Album '{args.album}' laden...")
-        photos_api = get_google_photos(args.album)
-        print(f"    {len(photos_api)} Bilder im Album")
-        print("\n🚀  Verarbeitung startet...\n")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            bar = tqdm(photos_api, unit="Foto", ncols=80, colour="green")
-            for photo in bar:
-                filename = photo["filename"]
-                bar.set_description(f"{filename[:30]:<30}")
-
-                tmp_path = Path(tmpdir) / filename
-                try:
-                    url = photo["baseUrl"] + "=d"
-                    tmp_path.write_bytes(requests.get(url, timeout=30).content)
-                except Exception as e:
-                    tqdm.write(f"❌  {filename} – Download-Fehler: {e}")
-                    errors += 1
-                    continue
-
-                process_photo(tmp_path, f"{R2_PREFIX}{filename}")
+    bar = tqdm(photos_local, unit="Foto", ncols=80, colour="green")
+    for photo_path in bar:
+        bar.set_description(f"{photo_path.name[:30]:<30}")
+        process_photo(photo_path, f"{R2_PREFIX}{photo_path.name}")
 
     summary = f"""
 📊  Zusammenfassung:
