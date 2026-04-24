@@ -90,7 +90,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
           <div class="info">
             <div class="info-row">
               <span class="info-label">🦴 {lang === "de" ? "Lieblingssnack" : "Favourite snack"}</span>
-              <span class="info-value">{lang === "de" ? "Kopfhaut" : "Scalp"}</span>
+              <span class="info-value">{lang === "de" ? "Rinderkopfhaut" : "Beef scalp"}</span>
             </div>
           </div>
 
