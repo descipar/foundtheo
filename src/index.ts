@@ -20,8 +20,9 @@ const app = new Hono<{ Bindings: Bindings }>();
 // Nur Anfragen von foundtheo.de erlauben – workers.dev und andere Domains sperren
 // localhost wird für lokale Entwicklung durchgelassen
 app.use("*", async (c, next) => {
-  const host = c.req.header("host") ?? "";
-  if (!host.includes("foundtheo.de") && !host.startsWith("localhost")) {
+  const host = (c.req.header("host") ?? "").split(":")[0]; // Port entfernen
+  const allowedHosts = ["foundtheo.de", "www.foundtheo.de", "localhost"];
+  if (!allowedHosts.includes(host)) {
     return c.text("Not found", 404);
   }
   await next();

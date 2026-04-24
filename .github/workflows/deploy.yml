@@ -26,6 +26,9 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit || true
 
+      - name: Run tests
+        run: npm test
+
       - name: Deploy to Cloudflare Workers
         id: deploy
         uses: cloudflare/wrangler-action@v3

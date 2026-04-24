@@ -24,6 +24,28 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 
 ---
 
+## Tests
+
+```bash
+npm test                 # alle Tests (Unit + Integration)
+npm run test:unit        # nur Unit Tests (Node-Environment)
+npm run test:integration # nur Integration Tests (Workers-Runtime mit Miniflare)
+npm run test:watch       # Unit Tests im Watch-Modus
+```
+
+**Unit Tests** (`src/test/unit/`) – reine Funktionen ohne CF-Bindings:
+- `calcAge()` – Altersberechnung inkl. Monats-/Jahresübergänge
+- `pickImages()` – Fisher-Yates Shuffle, Keine Duplikate, Mutation-Safety
+- `detectLang()` + `translations.age()` – Spracherkennung und Pluralformen
+
+**Integration Tests** (`src/test/integration/`) – laufen in der echten Workers-Runtime via Miniflare:
+- `recordScan()` – Deduplication (IP-Hash, Null-IP, Badge-Trennung)
+- Route `/theo/:badge` – 200 für gültige Badges, 404 für ungültige
+- Route `/api/images/:key` – Sicherheitscheck (kein Zugriff außerhalb `dogs/`)
+- Host-Check Middleware – workers.dev-Zugriff gesperrt, foundtheo.de erlaubt
+
+---
+
 ## Lokale Entwicklung
 
 ```bash

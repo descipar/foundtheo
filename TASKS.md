@@ -1,21 +1,33 @@
 # foundtheo – Änderungswünsche
 
 ## 🟡 Offen
-<!-- Hier neue Tickets eintragen -->
-- [ ] Cloudflare Production einrichten: D1 + R2 Bucket anlegen, `wrangler secret put THEO_EMAIL/THEO_PHONE`, GitHub Secrets für Deploy-Pipeline (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)
-- [ ] Unit Tests einrichten (Vitest + @cloudflare/vitest-pool-workers) für: pickImages(), calcAge(), detectLang(), recordScan() Deduplizierung
-- [ ] Integration Tests für Routen: /theo/:badge (200/404), /api/images/:key (Sicherheitscheck)
+
 - [ ] Optional: Zusätzliche Route für Badge-Übersicht (z.B. `/theo/badges`) mit Links zu den einzelnen Badges
 - [ ] Optional: Admin-Interface für Scan-Statistiken (z.B. Anzahl Scans pro Tag, beliebteste Badges, etc.)
-- [ ] Optional: Bild-Upload Script für Production R2 Bucket (aktuell nur lokales Script vorhanden)
 - [ ] Optional: Erweiterung der Datenbank um weitere Informationen (z.B. Scan-Standort, Gerätetyp, etc.) – natürlich unter Berücksichtigung der Privatsphäre
 
 ## ✅ Erledigt
+
+- [x] Unit Tests (Vitest): calcAge(), pickImages(), detectLang(), translations.age() – 27 Tests
+- [x] Integration Tests (Cloudflare Workers Pool): recordScan() Deduplizierung, Routen /theo/:badge (200/404), /api/images/:key Sicherheitscheck, Host-Check Middleware – 19 Tests
+- [x] Security-Fix: Host-Check-Middleware von `includes("foundtheo.de")` auf Exact-Match umgestellt (verhindert bypass via foundtheo.descipar.workers.dev)
+- [x] deploy.yml: Test-Schritt (`npm test`) vor Deploy eingebaut
+- [x] Scan-Deduplication: Cookie (12h) verhindert Reload-Zählung, D1-seitige IP+Badge-Sperre für 12 Stunden als serverseitiger Schutz
+- [x] Domain-Setup: foundtheo.de als Custom Domain, HTTPS-Redirect via Cloudflare, Fritz!Box DNS-Rebind-Schutz als Exception
+- [x] Security: Host-Check Middleware gegen workers.dev-Zugriff, robots.txt für Crawler-Sperrung, localhost für lokale Entwicklung freigeschaltet
+- [x] Foto-Upload Script: scripts/upload_photos.py mit YOLO-Personenerkennung, HEIC/HEIF→JPEG, Dry-run mit Preview-Ordnern, R2 via boto3 mit EU-Endpoint
+- [x] R2 Verbindungstest: scripts/test_r2.py
+- [x] README.md erstellt mit Tech Stack, Deployment, D1-Migrations und Foto-Upload Workflow
+- [x] Nemetschek Corporate Navy Theme (#1B3A6B) aus offizieller Präsentation
+- [x] StatsBar: 🌐 Direct-Button klickbar, Hinweistext, Tooltips für alle Theme-Buttons
+- [x] Infoleiste: Emojis vor Rasse (🐶) und Alter (🎂), Lieblingssnack als info-row
+- [x] TheoPage in kleinere Komponenten aufgeteilt (IdHeader, StatsBar, ImageGallery, ContactCard, CardFooter)
 - [x] Nemetschek-Theme: Farben auf Corporate Black/Charcoal (#1A1A1A) gesetzt
 - [x] CSS auf CSS Custom Properties (--color-primary etc.) umgestellt – Theme wechselbar ohne Reload
 - [x] Theme-Switching per Klick auf Scan-Zähler in Stats-Bar (ohne Scan zu erhöhen)
 - [x] GitHub Version Control: .gitignore, initialer Commit, SSH-Push
 - [x] GitHub Actions Deploy-Pipeline: automatisches Deploy bei Push auf main
+- [x] Cloudflare Production eingerichtet: D1 + R2 Bucket, Worker Secrets, GitHub Secrets
 - [x] Secrets aus wrangler.toml ausgelagert: THEO_EMAIL + THEO_PHONE als Worker Secrets / .dev.vars
 - [x] Lightbox für Bilder: Klick auf Bild zeigt es in Vollansicht (mit Schließen per Klick oder Escape-Taste)
 - [x] Lokale Entwicklungsumgebung aufgesetzt (wrangler dev mit lokalen Testbildern via R2-Emulation)

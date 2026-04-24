@@ -7,6 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "theo-badge"
 database_id = "15905aeb-256d-4312-8d3a-13a23b4bddaf"
+migrations_dir = "migrations"
 
 [[r2_buckets]]
 binding = "IMAGES"
