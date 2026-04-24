@@ -3,35 +3,32 @@ import { themes } from "../themes";
 /**
  * Client-seitiges JavaScript als String – wird inline in die Seite eingebettet.
  * Enthält: Theme-Switching (ohne Server-Request), Lightbox-Steuerung.
+ *
+ * Die Theme-Daten werden einmalig aus themes.ts serialisiert – keine Duplikation.
  */
-export const clientScript = `
-  var THEMES = {
-    adesso: {
-      primary:       '${themes.adesso.primary}',
-      primaryDark:   '${themes.adesso.primaryDark}',
-      primaryLight:  '${themes.adesso.primaryLight}',
-      primaryBorder: '${themes.adesso.primaryBorder}',
-      logoPath:      '${themes.adesso.logoPath}',
-      logoAlt:       '${themes.adesso.logoAlt}',
-    },
-    nemetschek: {
-      primary:       '${themes.nemetschek.primary}',
-      primaryDark:   '${themes.nemetschek.primaryDark}',
-      primaryLight:  '${themes.nemetschek.primaryLight}',
-      primaryBorder: '${themes.nemetschek.primaryBorder}',
-      logoPath:      '${themes.nemetschek.logoPath}',
-      logoAlt:       '${themes.nemetschek.logoAlt}',
-    },
-    direct: {
-      primary:       '${themes.direct.primary}',
-      primaryDark:   '${themes.direct.primaryDark}',
-      primaryLight:  '${themes.direct.primaryLight}',
-      primaryBorder: '${themes.direct.primaryBorder}',
-      logoPath:      '${themes.direct.logoPath}',
-      logoAlt:       '${themes.direct.logoAlt}',
-    },
-  };
 
+// Nur die für den Client relevanten Felder aus themes.ts extrahieren
+const clientThemes = Object.fromEntries(
+  Object.entries(themes).map(([key, t]) => [
+    key,
+    {
+      primary:       t.primary,
+      primaryDark:   t.primaryDark,
+      primaryLight:  t.primaryLight,
+      primaryBorder: t.primaryBorder,
+      logoPath:      t.logoPath,
+      logoAlt:       t.logoAlt,
+    },
+  ])
+);
+
+export const clientScript = `
+  var THEMES = ${JSON.stringify(clientThemes)};
+
+  /**
+   * Wechselt das aktive Theme per CSS Custom Properties.
+   * Wird durch Klick auf einen Badge-Button in der StatsBar ausgelöst.
+   */
   function switchTheme(themeKey) {
     var t = THEMES[themeKey];
     if (!t) return;

@@ -109,5 +109,3 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
     </html>
   );
 }
-
-export { calcAge } from "../utils/calcAge";
