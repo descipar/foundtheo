@@ -16,7 +16,9 @@ export async function recordScan(
   badgeId: string,
   ipHash: string | null,
   ua: string | null,
-  source: ScanSource = "qr"
+  source: ScanSource = "qr",
+  country: string | null = null,
+  city: string | null = null
 ): Promise<void> {
   // Deduplication: skip if same ip_hash + badge_id within DEDUPE_SECONDS
   if (ipHash) {
@@ -35,10 +37,10 @@ export async function recordScan(
 
   await db
     .prepare(
-      `INSERT INTO scans (dog_id, badge_id, ip_hash, ua, source)
-       VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO scans (dog_id, badge_id, ip_hash, ua, source, country, city)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
-    .bind(dogId, badgeId, ipHash, ua, source)
+    .bind(dogId, badgeId, ipHash, ua, source, country, city)
     .run();
 }
 
@@ -71,4 +73,56 @@ export async function getScanStats(
     if (row.badge_id === "direct") stats.direct = row.cnt;
   }
   return stats;
+}
+
+export interface AdminStats {
+  totalScans: number;
+  byBadge: { badge_id: string; cnt: number }[];
+  last30Days: { day: string; cnt: number }[];
+  topCountries: { country: string; cnt: number }[];
+  topCities: { city: string; country: string; cnt: number }[];
+  bySource: { source: string; cnt: number }[];
+}
+
+/**
+ * Returns extended statistics for the admin dashboard.
+ */
+export async function getAdminStats(db: D1Database): Promise<AdminStats> {
+  const [byBadge, last30Days, topCountries, topCities, bySource] = await Promise.all([
+    db.prepare(
+      `SELECT badge_id, COUNT(*) as cnt FROM scans GROUP BY badge_id ORDER BY cnt DESC`
+    ).all<{ badge_id: string; cnt: number }>(),
+
+    db.prepare(
+      `SELECT date(scanned_at) as day, COUNT(*) as cnt
+       FROM scans
+       WHERE scanned_at >= datetime('now', '-30 days')
+       GROUP BY day ORDER BY day ASC`
+    ).all<{ day: string; cnt: number }>(),
+
+    db.prepare(
+      `SELECT COALESCE(country, '?') as country, COUNT(*) as cnt
+       FROM scans GROUP BY country ORDER BY cnt DESC LIMIT 10`
+    ).all<{ country: string; cnt: number }>(),
+
+    db.prepare(
+      `SELECT COALESCE(city, '?') as city, COALESCE(country, '?') as country, COUNT(*) as cnt
+       FROM scans GROUP BY city, country ORDER BY cnt DESC LIMIT 10`
+    ).all<{ city: string; country: string; cnt: number }>(),
+
+    db.prepare(
+      `SELECT source, COUNT(*) as cnt FROM scans GROUP BY source ORDER BY cnt DESC`
+    ).all<{ source: string; cnt: number }>(),
+  ]);
+
+  const totalScans = byBadge.results.reduce((sum, r) => sum + r.cnt, 0);
+
+  return {
+    totalScans,
+    byBadge: byBadge.results,
+    last30Days: last30Days.results,
+    topCountries: topCountries.results,
+    topCities: topCities.results,
+    bySource: bySource.results,
+  };
 }

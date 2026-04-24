@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { theoRoutes } from "./routes/theo";
 import { imageRoutes } from "./routes/images";
+import { adminRoutes } from "./routes/admin";
 import { serveStatic } from "hono/cloudflare-workers";
 
 export interface Bindings {
@@ -13,6 +14,7 @@ export interface Bindings {
   THEO_BREED: string;
   THEO_TITLE: string;
   THEO_BADGE_NR: string;
+  ADMIN_PASSWORD: string;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -30,6 +32,7 @@ app.use("*", async (c, next) => {
 
 app.route("/theo", theoRoutes);
 app.route("/api/images", imageRoutes);
+app.route("/admin", adminRoutes);
 
 // Statische Assets (Logos etc.) aus public/
 app.use("/public/*", serveStatic({ root: "./" }));

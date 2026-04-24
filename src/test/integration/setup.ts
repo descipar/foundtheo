@@ -16,7 +16,9 @@ const migrations = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_scans_dog_badge ON scans (dog_id, badge_id)`,
   `CREATE INDEX IF NOT EXISTS idx_scans_ip_hash   ON scans (ip_hash, badge_id, scanned_at)`,
-  `ALTER TABLE scans ADD COLUMN source TEXT NOT NULL DEFAULT 'qr'`,
+  `ALTER TABLE scans ADD COLUMN source  TEXT NOT NULL DEFAULT 'qr'`,
+  `ALTER TABLE scans ADD COLUMN country TEXT`,
+  `ALTER TABLE scans ADD COLUMN city    TEXT`,
 ];
 
 // Run once before all tests in this project

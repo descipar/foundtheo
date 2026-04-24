@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { detectLang, translations } from "../../i18n/translations";
 
+describe("translations – photoHint vorhanden", () => {
+  it("DE hat photoHint", () => {
+    expect(translations.de.photoHint).toContain("📸");
+  });
+  it("EN hat photoHint", () => {
+    expect(translations.en.photoHint).toContain("📸");
+  });
+});
+
 describe("detectLang", () => {
   it("gibt 'de' zurück für undefined", () => {
     expect(detectLang(undefined)).toBe("de");

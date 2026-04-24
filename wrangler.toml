@@ -21,6 +21,7 @@ THEO_BREED = "Labrador"
 THEO_TITLE = "Chief Snack Officer"
 THEO_BADGE_NR = "170425"
 
-# THEO_EMAIL und THEO_PHONE sind Worker Secrets (nicht hier eintragen!):
+# Secrets (nicht hier eintragen – als Worker Secret setzen!):
 # wrangler secret put THEO_EMAIL
 # wrangler secret put THEO_PHONE
+# wrangler secret put ADMIN_PASSWORD

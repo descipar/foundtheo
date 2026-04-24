@@ -32,6 +32,11 @@ async function renderPage(
   ua: string | null,
   lang: string | undefined
 ) {
+  // Geo-Daten aus Cloudflare Request Metadata (nur in Produktion verfügbar)
+  const cf = c.req.raw.cf as { country?: string; city?: string } | undefined;
+  const country = cf?.country ?? null;
+  const city = cf?.city ?? null;
+
   // Cookie-Check: gleicher Badge bereits innerhalb der letzten Stunde gezählt?
   const cookieName = `scanned_${badgeId}`;
   const alreadyCounted = getCookie(c, cookieName);
@@ -39,7 +44,7 @@ async function renderPage(
   if (!alreadyCounted) {
     const ipHash = await hashIp(ip);
     executionCtx.waitUntil(
-      recordScan(env.DB, "theo", badgeId, ipHash, ua, source)
+      recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city)
     );
     setCookie(c, cookieName, "1", {
       maxAge: COOKIE_MAX_AGE,

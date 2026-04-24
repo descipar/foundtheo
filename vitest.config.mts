@@ -28,6 +28,7 @@ export default defineConfig({
                 THEO_BADGE_NR: "170425",
                 THEO_EMAIL: "test@example.com",
                 THEO_PHONE: "+4912345",
+                ADMIN_PASSWORD: "testpassword",
               },
             },
           }),
