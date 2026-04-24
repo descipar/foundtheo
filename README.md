@@ -83,15 +83,23 @@ Fotos aus einem lokalen Ordner in den R2 Bucket hochladen. YOLO erkennt automati
 pip3 install ultralytics pillow pillow-heif requests tqdm boto3
 ```
 
-R2 API Credentials in `scripts/upload_photos.py` eintragen:
+Credentials in `scripts/.env` eintragen (wird nicht committed):
 
-```python
-R2_ACCOUNT_ID = "..."
-R2_ACCESS_KEY = "..."
-R2_SECRET_KEY = "..."
+```
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY=...
+R2_SECRET_KEY=...
+R2_ENDPOINT=https://<account-id>.eu.r2.cloudflarestorage.com
 ```
 
-Credentials erstellen: Cloudflare Dashboard → R2 → **Manage R2 API Tokens**
+Credentials erstellen: Cloudflare Dashboard → R2 → **Manage R2 API Tokens** → Object Read & Write  
+Hinweis: EU-Bucket benötigt den EU-spezifischen Endpoint (`.eu.r2.cloudflarestorage.com`).
+
+Verbindung testen:
+
+```bash
+python3 scripts/test_r2.py
+```
 
 ### Workflow
 
