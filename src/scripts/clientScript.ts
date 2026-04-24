@@ -101,10 +101,14 @@ export const clientScript = `
     btn.addEventListener('click', function(e) {
       e.stopPropagation(); // Lightbox nicht öffnen
 
+      if (btn.disabled) return; // Request läuft bereits – ignorieren
+
       var heart   = btn.querySelector('.like-heart');
       var counter = btn.querySelector('.like-count');
       var current = parseInt(counter.textContent || '0', 10) || 0;
       var set     = getLikedSet();
+
+      btn.disabled = true; // Doppelklick sperren bis Antwort da
 
       if (!btn.classList.contains('liked')) {
         // ── LIKE ──
@@ -113,7 +117,7 @@ export const clientScript = `
 
         btn.classList.add('liked', 'pop');
         heart.textContent = '❤️';
-        counter.textContent = current + 1 > 0 ? String(current + 1) : '';
+        counter.textContent = String(current + 1);
         btn.title = 'Like zurücknehmen';
         setTimeout(function() { btn.classList.remove('pop'); }, 400);
 
@@ -124,7 +128,8 @@ export const clientScript = `
               counter.textContent = data.cnt > 0 ? String(data.cnt) : '';
             }
           })
-          .catch(function() {});
+          .catch(function() {})
+          .finally(function() { btn.disabled = false; });
 
       } else {
         // ── UNLIKE ──
@@ -143,7 +148,8 @@ export const clientScript = `
               counter.textContent = data.cnt > 0 ? String(data.cnt) : '';
             }
           })
-          .catch(function() {});
+          .catch(function() {})
+          .finally(function() { btn.disabled = false; });
       }
     });
 
