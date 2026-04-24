@@ -20,7 +20,7 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 - Badge-Themes: adesso, Nemetschek, Standard – per Klick wechselbar
 - Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
 - Foto-Galerie mit Lightbox
-- Like-Funktion pro Bild – Heart-Overlay mit Zähler, Doppel-Like via localStorage verhindert
+- Like-Funktion pro Bild – Heart-Overlay mit Zähler, Toggle (Like/Unlike) via localStorage
 - Automatischer Foto-Upload mit Personenerkennung (YOLO)
 - Admin-Interface unter `/admin` mit Scan-Statistiken und Like-Verwaltung (passwortgeschützt)
 
