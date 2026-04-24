@@ -1,0 +1,2 @@
+ALTER TABLE scans ADD COLUMN country TEXT;
+ALTER TABLE scans ADD COLUMN city TEXT;
