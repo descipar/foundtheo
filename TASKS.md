@@ -6,6 +6,7 @@ _(keine offenen Punkte)_
 
 ## ✅ Erledigt
 
+- [x] Test-Coverage erweitert (85 Tests): `db/likes.ts` komplett (getLikes, incrementLike, decrementLike MAX-Clamp, resetLikes), Like/Unlike-Routen inkl. Key-Validierung, `/theo/badges`, Admin-Mutations (delete, reset-likes); Bugfix: Unlike-Route war durch falsche Hono-Registrierungsreihenfolge unerreichbar
 - [x] Badge-Übersicht unter `/theo/badges`: Karten für alle Badge-Typen mit Theme-Farben und Live-Scan-Zählern, Links zu den einzelnen Badge-Seiten
 - [x] Image-Like-Feature: Heart-Overlay auf jedem Bild, Like-Zähler per D1 (`image_likes`-Tabelle), Toggle (Like/Unlike) per localStorage, rein optimistisches Update (kein inflight-Lock), Admin-Reset-Button, neue Bilder starten automatisch bei 0
 - [x] Admin-Interface: Delete-Buttons immer für alle Badge-Typen sichtbar (adesso, nemetschek, direct) – unabhängig von vorhandenen Scan-Daten

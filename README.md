@@ -44,9 +44,13 @@ npm run test:watch       # Unit Tests im Watch-Modus
 **Integration Tests** (`src/test/integration/`) – laufen in der echten Workers-Runtime via Miniflare:
 - `recordScan()` – Deduplication (IP-Hash, Null-IP, Badge-Trennung)
 - Route `/theo/:badge` – 200 für gültige Badges, 404 für ungültige
+- Route `/theo/badges` – 200, HTML-Content
 - Route `/api/images/:key` – Sicherheitscheck (kein Zugriff außerhalb `dogs/`)
+- Route `/api/like/:key` und `/api/like/unlike/:key` – Key-Validierung (403 bei Path-Traversal), Zähler-Logik
 - Route `/admin` – 401 ohne Auth, 200 mit richtigem Passwort
+- Route `/admin/delete` und `/admin/reset-likes` – Auth-Check, Redirect, DB-Effekte
 - Host-Check Middleware – workers.dev-Zugriff gesperrt, foundtheo.de erlaubt
+- `getLikes`, `incrementLike`, `decrementLike` (MAX-Clamp auf 0), `resetLikes` – D1-Funktionen
 
 ---
 
