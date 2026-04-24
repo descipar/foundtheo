@@ -149,3 +149,7 @@ HEIC/HEIF-Dateien werden automatisch nach JPEG konvertiert.
 | `--dry-run` | Nur simulieren, nichts hochladen |
 | `--skip-r2-check` | R2-Prüfung überspringen |
 | `--upload-preview` | Bilder aus `preview_upload/` hochladen |
+
+---
+
+Dieses Projekt wurde mit Unterstützung von [Claude](https://claude.ai) (KI-Assistent von Anthropic) entwickelt.
