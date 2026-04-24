@@ -86,16 +86,14 @@ export const clientScript = `
 
   /**
    * Erstellt den Like/Unlike-Toggle-Button für einen Wrapper und hängt ihn ein.
-   * Einfaches Toggle: Like → Unlike → Like … – jederzeit, auch nach Reload.
    *
-   * localCount wird als Closure-Variable gehalten – niemals aus dem DOM gelesen.
-   * Das verhindert Synchronisationsprobleme zwischen optimistischem Update und
-   * asynchroner Server-Antwort.
+   * Jeder Klick toggled sofort optimistisch – kein Warten auf Server-Antwort.
+   * localCount ist die einzige Quelle der Wahrheit, wird nie aus dem DOM gelesen.
+   * Der API-Call läuft still im Hintergrund; Zähler und Zustand bleiben konsistent.
    */
   function attachLikeButton(wrapper, imgKey, count, likedSet) {
     var isLiked    = likedSet.has(imgKey);
-    var localCount = count;   // einzige Quelle der Wahrheit für den Zähler
-    var inflight   = false;   // verhindert Doppelklick während laufendem Request
+    var localCount = count; // einzige Quelle der Wahrheit – nie aus DOM lesen
 
     var btn = document.createElement('button');
     btn.className = 'like-btn' + (isLiked ? ' liked' : '');
@@ -113,8 +111,6 @@ export const clientScript = `
 
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      if (inflight) return;
-      inflight = true;
 
       var set = getLikedSet();
 
@@ -131,16 +127,7 @@ export const clientScript = `
         setTimeout(function() { btn.classList.remove('pop'); }, 400);
 
         fetch('/api/like/' + encodeURIComponent(imgKey), { method: 'POST' })
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            // Server-Wert übernehmen – gleicht Abweichungen durch parallele Likes aus
-            if (data && typeof data.cnt === 'number') {
-              localCount = data.cnt;
-              updateDisplay();
-            }
-          })
-          .catch(function() {})
-          .finally(function() { inflight = false; });
+          .catch(function() {});
 
       } else {
         // ── UNLIKE ──
@@ -154,15 +141,7 @@ export const clientScript = `
         updateDisplay();
 
         fetch('/api/unlike/' + encodeURIComponent(imgKey), { method: 'POST' })
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            if (data && typeof data.cnt === 'number') {
-              localCount = data.cnt;
-              updateDisplay();
-            }
-          })
-          .catch(function() {})
-          .finally(function() { inflight = false; });
+          .catch(function() {});
       }
     });
 
