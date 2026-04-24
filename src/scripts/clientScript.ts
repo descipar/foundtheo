@@ -87,69 +87,82 @@ export const clientScript = `
   /**
    * Erstellt den Like/Unlike-Toggle-Button für einen Wrapper und hängt ihn ein.
    * Einfaches Toggle: Like → Unlike → Like … – jederzeit, auch nach Reload.
+   *
+   * localCount wird als Closure-Variable gehalten – niemals aus dem DOM gelesen.
+   * Das verhindert Synchronisationsprobleme zwischen optimistischem Update und
+   * asynchroner Server-Antwort.
    */
   function attachLikeButton(wrapper, imgKey, count, likedSet) {
-    var isLiked = likedSet.has(imgKey);
+    var isLiked    = likedSet.has(imgKey);
+    var localCount = count;   // einzige Quelle der Wahrheit für den Zähler
+    var inflight   = false;   // verhindert Doppelklick während laufendem Request
 
     var btn = document.createElement('button');
     btn.className = 'like-btn' + (isLiked ? ' liked' : '');
     btn.title = isLiked ? 'Like zurücknehmen' : 'Bild liken';
     btn.innerHTML =
       '<span class="like-heart">' + (isLiked ? '❤️' : '🤍') + '</span>' +
-      '<span class="like-count">' + (count > 0 ? count : '') + '</span>';
+      '<span class="like-count">' + (localCount > 0 ? localCount : '') + '</span>';
+
+    var heart   = btn.querySelector('.like-heart');
+    var counter = btn.querySelector('.like-count');
+
+    function updateDisplay() {
+      counter.textContent = localCount > 0 ? String(localCount) : '';
+    }
 
     btn.addEventListener('click', function(e) {
-      e.stopPropagation(); // Lightbox nicht öffnen
+      e.stopPropagation();
+      if (inflight) return;
+      inflight = true;
 
-      if (btn.disabled) return; // Request läuft bereits – ignorieren
-
-      var heart   = btn.querySelector('.like-heart');
-      var counter = btn.querySelector('.like-count');
-      var current = parseInt(counter.textContent || '0', 10) || 0;
-      var set     = getLikedSet();
-
-      btn.disabled = true; // Doppelklick sperren bis Antwort da
+      var set = getLikedSet();
 
       if (!btn.classList.contains('liked')) {
         // ── LIKE ──
+        localCount++;
         set.add(imgKey);
         saveLikedSet(set);
 
         btn.classList.add('liked', 'pop');
         heart.textContent = '❤️';
-        counter.textContent = String(current + 1);
         btn.title = 'Like zurücknehmen';
+        updateDisplay();
         setTimeout(function() { btn.classList.remove('pop'); }, 400);
 
         fetch('/api/like/' + encodeURIComponent(imgKey), { method: 'POST' })
           .then(function(res) { return res.json(); })
           .then(function(data) {
+            // Server-Wert übernehmen – gleicht Abweichungen durch parallele Likes aus
             if (data && typeof data.cnt === 'number') {
-              counter.textContent = data.cnt > 0 ? String(data.cnt) : '';
+              localCount = data.cnt;
+              updateDisplay();
             }
           })
           .catch(function() {})
-          .finally(function() { btn.disabled = false; });
+          .finally(function() { inflight = false; });
 
       } else {
         // ── UNLIKE ──
+        localCount = Math.max(0, localCount - 1);
         set.delete(imgKey);
         saveLikedSet(set);
 
         btn.classList.remove('liked');
         heart.textContent = '🤍';
-        counter.textContent = current - 1 > 0 ? String(current - 1) : '';
         btn.title = 'Bild liken';
+        updateDisplay();
 
         fetch('/api/unlike/' + encodeURIComponent(imgKey), { method: 'POST' })
           .then(function(res) { return res.json(); })
           .then(function(data) {
             if (data && typeof data.cnt === 'number') {
-              counter.textContent = data.cnt > 0 ? String(data.cnt) : '';
+              localCount = data.cnt;
+              updateDisplay();
             }
           })
           .catch(function() {})
-          .finally(function() { btn.disabled = false; });
+          .finally(function() { inflight = false; });
       }
     });
 
