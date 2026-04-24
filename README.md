@@ -115,11 +115,13 @@ Zeigt: Scan-Gesamtzahl, Aufschlüsselung nach Badge und Quelle (QR vs. Direkt), 
 
 Geo-Daten (Land, Stadt) werden automatisch aus Cloudflares Request-Metadaten gespeichert – ohne Personenbezug, nur IP-Hash wird hinterlegt.
 
+Scans können direkt im Admin-Interface gelöscht werden – entweder alle auf einmal oder gefiltert nach Badge-Typ (adesso, nemetschek, direct).
+
 ```bash
 # Passwort einmalig in Produktion setzen
 wrangler secret put ADMIN_PASSWORD
 
-# Scanzähler zurücksetzen (falls nötig)
+# Scanzähler alternativ per CLI zurücksetzen
 npx wrangler d1 execute theo-badge --remote --command "DELETE FROM scans;"
 ```
 

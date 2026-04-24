@@ -3,11 +3,19 @@
 ## 🟡 Offen
 
 - [ ] Optional: Zusätzliche Route für Badge-Übersicht (z.B. `/theo/badges`) mit Links zu den einzelnen Badges
-- [ ] Optional: Admin-Interface für Scan-Statistiken (z.B. Anzahl Scans pro Tag, beliebteste Badges, etc.)
-- [ ] Optional: Erweiterung der Datenbank um weitere Informationen (z.B. Scan-Standort, Gerätetyp, etc.) – natürlich unter Berücksichtigung der Privatsphäre
 
 ## ✅ Erledigt
 
+- [x] Admin-Interface: Delete-Buttons immer für alle Badge-Typen sichtbar (adesso, nemetschek, direct) – unabhängig von vorhandenen Scan-Daten
+- [x] Admin-Interface: CSS in eigene Datei `adminStyles.ts` ausgelagert, keine Inline-Styles mehr in AdminPage
+- [x] Admin-Interface: Sub-Komponenten (StatCard, BarChart, StatsTable, DeletePanel) für bessere Lesbarkeit
+- [x] Admin-Interface: Scans löschen per UI – alle oder gefiltert nach Badge-Typ
+- [x] Admin-Interface: Link zur Hauptseite im Admin-Header, Admin-Link im Footer der Hauptseite
+- [x] Admin-Interface (`/admin`): Scan-Statistiken, Geo-Daten, Scans der letzten 30 Tage, Top-Länder/Städte – passwortgeschützt via HTTP Basic Auth
+- [x] Geo-Daten (Land, Stadt) aus Cloudflare Request-Metadaten in D1 gespeichert – kein Personenbezug
+- [x] D1 Migration 0003: `country` und `city` Spalten hinzugefügt
+- [x] Theme-Daten-Deduplizierung: `clientScript.ts` nutzt `JSON.stringify(clientThemes)` statt doppelter Pflege
+- [x] Foto-Hint in Galerie: kleiner Hinweistext unter den Thumbnails
 - [x] Unit Tests (Vitest): calcAge(), pickImages(), detectLang(), translations.age() – 27 Tests
 - [x] Integration Tests (Cloudflare Workers Pool): recordScan() Deduplizierung, Routen /theo/:badge (200/404), /api/images/:key Sicherheitscheck, Host-Check Middleware – 19 Tests
 - [x] Security-Fix: Host-Check-Middleware von `includes("foundtheo.de")` auf Exact-Match umgestellt (verhindert bypass via foundtheo.descipar.workers.dev)
