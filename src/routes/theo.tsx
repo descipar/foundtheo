@@ -2,6 +2,7 @@
 import { Hono, type Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { TheoPage } from "../components/TheoPage";
+import { BadgesPage } from "../components/BadgesPage";
 import { calcAge } from "../utils/calcAge";
 import { recordScan, getScanStats } from "../db/scans";
 import { getLikes } from "../db/likes";
@@ -96,6 +97,12 @@ theoRoutes.get("/", async (c) => {
   return c.html(
     await renderPage(c, c.env, c.executionCtx, "direct", "direct", ip, ua, c.req.query("lang"))
   );
+});
+
+/** Badge-Übersicht: /theo/badges */
+theoRoutes.get("/badges", async (c) => {
+  const stats = await getScanStats(c.env.DB, "theo");
+  return c.html(<BadgesPage stats={stats} />);
 });
 
 /** QR-Scan: /theo/adesso oder /theo/nemetschek → source = qr */
