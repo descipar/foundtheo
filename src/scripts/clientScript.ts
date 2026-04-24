@@ -22,6 +22,14 @@ export const clientScript = `
       logoPath:      '${themes.nemetschek.logoPath}',
       logoAlt:       '${themes.nemetschek.logoAlt}',
     },
+    direct: {
+      primary:       '${themes.direct.primary}',
+      primaryDark:   '${themes.direct.primaryDark}',
+      primaryLight:  '${themes.direct.primaryLight}',
+      primaryBorder: '${themes.direct.primaryBorder}',
+      logoPath:      '${themes.direct.logoPath}',
+      logoAlt:       '${themes.direct.logoAlt}',
+    },
   };
 
   function switchTheme(themeKey) {

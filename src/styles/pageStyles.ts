@@ -113,6 +113,13 @@ export const pageStyles = `
   .stats-counts span[data-theme].active-theme strong { color: #fff; }
   .stats-counts strong { color: var(--color-primary); font-weight: 700; transition: color 0.3s; }
   .stats-counts img { height: 14px; width: auto; object-fit: contain; }
+  .stats-hint {
+    font-size: 0.6rem;
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-top: 0.3rem;
+    letter-spacing: 0.02em;
+  }
 
   /* ── Lang switch ── */
   .lang-switch {

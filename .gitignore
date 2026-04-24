@@ -12,6 +12,11 @@ node_modules/
 # Build-Ausgabe
 dist/
 
+# Foto-Upload Script
+photos/
+scripts/google_credentials.json
+scripts/google_token.json
+
 # macOS
 .DS_Store
 

@@ -19,10 +19,10 @@ export const themes: Record<string, BadgeTheme> = {
     badgeLabel:   "adesso",
   },
   nemetschek: {
-    primary:      "#1A1A1A",   // Nemetschek Corporate Black / Charcoal
-    primaryDark:  "#000000",
-    primaryLight: "#F4F4F4",
-    primaryBorder:"#E0E0E0",
+    primary:      "#1B3A6B",   // Nemetschek Corporate Navy (aus Präsentation Slide 6)
+    primaryDark:  "#0F2347",
+    primaryLight: "#EBF0F7",
+    primaryBorder:"#C5D4E8",
     logoPath:     "/public/logos/nemetschek.svg",
     logoAlt:      "Nemetschek",
     badgeLabel:   "Nemetschek",

@@ -87,9 +87,11 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
             </div>
           </div>
 
-          <div class="snack">
-            <div class="snack-label">🦴 {lang === "de" ? "Lieblingssnack" : "Favourite snack"}</div>
-            {lang === "de" ? "Alles was man lange kauen kann" : "Anything that takes forever to chew"}
+          <div class="info">
+            <div class="info-row">
+              <span class="info-label">🦴 {lang === "de" ? "Lieblingssnack" : "Favourite snack"}</span>
+              <span class="info-value">{lang === "de" ? "Kopfhaut" : "Scalp"}</span>
+            </div>
           </div>
 
           <ContactCard
