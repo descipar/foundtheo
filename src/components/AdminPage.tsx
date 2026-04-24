@@ -118,7 +118,6 @@ function DeletePanel({ badges }: { badges: string[] }) {
 
 export function AdminPage({ stats, deletedMsg }: Props) {
   const topCountry = stats.topCountries[0];
-  const knownBadges = stats.byBadge.map((b) => b.badge_id);
 
   const badgeRows = stats.byBadge.map((b) => ({
     badge: badgeLabel(b.badge_id),
@@ -231,8 +230,8 @@ export function AdminPage({ stats, deletedMsg }: Props) {
           </div>
         </div>
 
-        {/* Scan-Verwaltung */}
-        <DeletePanel badges={knownBadges} />
+        {/* Scan-Verwaltung – immer alle Badge-Typen anzeigen */}
+        <DeletePanel badges={["adesso", "nemetschek", "direct"]} />
 
       </body>
     </html>
