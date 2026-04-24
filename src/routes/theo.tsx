@@ -1,5 +1,6 @@
 /** @jsxImportSource hono/jsx */
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { TheoPage } from "../components/TheoPage";
 import { calcAge } from "../utils/calcAge";
 import { recordScan, getScanStats } from "../db/scans";
@@ -8,7 +9,8 @@ import { detectLang } from "../i18n/translations";
 import { getTheme } from "../themes";
 import type { Bindings } from "../index";
 
-const ALLOWED_BADGES = new Set(["adesso", "nemetschek"]);
+const ALLOWED_BADGES  = new Set(["adesso", "nemetschek"]);
+const COOKIE_MAX_AGE  = 43200; // 12 Stunden
 
 export const theoRoutes = new Hono<{ Bindings: Bindings }>();
 
@@ -21,6 +23,7 @@ async function hashIp(ip: string | null): Promise<string | null> {
 
 /** Hilfsfunktion: Seite rendern */
 async function renderPage(
+  c: Context<{ Bindings: Bindings }>,
   env: Bindings,
   executionCtx: ExecutionContext,
   badgeId: string,
@@ -29,11 +32,23 @@ async function renderPage(
   ua: string | null,
   lang: string | undefined
 ) {
-  const ipHash = await hashIp(ip);
+  // Cookie-Check: gleicher Badge bereits innerhalb der letzten Stunde gezählt?
+  const cookieName = `scanned_${badgeId}`;
+  const alreadyCounted = getCookie(c, cookieName);
 
-  executionCtx.waitUntil(
-    recordScan(env.DB, "theo", badgeId, ipHash, ua, source)
-  );
+  if (!alreadyCounted) {
+    const ipHash = await hashIp(ip);
+    executionCtx.waitUntil(
+      recordScan(env.DB, "theo", badgeId, ipHash, ua, source)
+    );
+    setCookie(c, cookieName, "1", {
+      maxAge: COOKIE_MAX_AGE,
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: true,
+      path: "/",
+    });
+  }
 
   const [allKeys, stats] = await Promise.all([
     listImageKeys(env.IMAGES),
@@ -71,7 +86,7 @@ theoRoutes.get("/", async (c) => {
   const ua = c.req.header("user-agent") ?? null;
 
   return c.html(
-    await renderPage(c.env, c.executionCtx, "direct", "direct", ip, ua, c.req.query("lang"))
+    await renderPage(c, c.env, c.executionCtx, "direct", "direct", ip, ua, c.req.query("lang"))
   );
 });
 
@@ -87,6 +102,6 @@ theoRoutes.get("/:badge", async (c) => {
   const ua = c.req.header("user-agent") ?? null;
 
   return c.html(
-    await renderPage(c.env, c.executionCtx, badge, "qr", ip, ua, c.req.query("lang"))
+    await renderPage(c, c.env, c.executionCtx, badge, "qr", ip, ua, c.req.query("lang"))
   );
 });

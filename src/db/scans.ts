@@ -2,7 +2,7 @@ export interface Env {
   DB: D1Database;
 }
 
-const DEDUPE_SECONDS = 30;
+const DEDUPE_SECONDS = 43200; // 12 Stunden – verhindert Reloads und Doppelscans
 
 export type ScanSource = "qr" | "direct";
 
