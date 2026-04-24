@@ -18,9 +18,10 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 
 - Mehrsprachig (DE/EN) – automatische Spracherkennung via URL-Parameter
 - Badge-Themes: adesso, Nemetschek, Standard – per Klick wechselbar
-- Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf)
+- Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
 - Foto-Galerie mit Lightbox
 - Automatischer Foto-Upload mit Personenerkennung (YOLO)
+- Admin-Interface unter `/admin` mit Scan-Statistiken (passwortgeschützt)
 
 ---
 
@@ -42,6 +43,7 @@ npm run test:watch       # Unit Tests im Watch-Modus
 - `recordScan()` – Deduplication (IP-Hash, Null-IP, Badge-Trennung)
 - Route `/theo/:badge` – 200 für gültige Badges, 404 für ungültige
 - Route `/api/images/:key` – Sicherheitscheck (kein Zugriff außerhalb `dogs/`)
+- Route `/admin` – 401 ohne Auth, 200 mit richtigem Passwort
 - Host-Check Middleware – workers.dev-Zugriff gesperrt, foundtheo.de erlaubt
 
 ---
@@ -58,6 +60,7 @@ Secrets für lokale Entwicklung in `.dev.vars` eintragen (wird nicht committed):
 ```
 THEO_EMAIL=deine@email.de
 THEO_PHONE=+49123456789
+ADMIN_PASSWORD=beliebig
 ```
 
 ---
@@ -74,6 +77,15 @@ Benötigte GitHub Secrets:
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Account ID |
 | `THEO_EMAIL` | Kontakt-E-Mail (Worker Secret) |
 | `THEO_PHONE` | Kontakt-Telefon (Worker Secret) |
+| `ADMIN_PASSWORD` | Passwort für `/admin` (Worker Secret) |
+
+Worker Secrets einmalig in Produktion setzen (bleiben über Deployments erhalten):
+
+```bash
+wrangler secret put THEO_EMAIL
+wrangler secret put THEO_PHONE
+wrangler secret put ADMIN_PASSWORD
+```
 
 Manuell deployen:
 
@@ -91,6 +103,24 @@ npx wrangler d1 migrations apply theo-badge
 
 # Migrations in Produktion anwenden
 npx wrangler d1 migrations apply theo-badge --remote
+```
+
+---
+
+## Admin-Interface
+
+Erreichbar unter `https://foundtheo.de/admin` – geschützt durch HTTP Basic Auth.
+
+Zeigt: Scan-Gesamtzahl, Aufschlüsselung nach Badge und Quelle (QR vs. Direkt), Scans der letzten 30 Tage als Balkendiagramm, Top-Länder und Top-Städte.
+
+Geo-Daten (Land, Stadt) werden automatisch aus Cloudflares Request-Metadaten gespeichert – ohne Personenbezug, nur IP-Hash wird hinterlegt.
+
+```bash
+# Passwort einmalig in Produktion setzen
+wrangler secret put ADMIN_PASSWORD
+
+# Scanzähler zurücksetzen (falls nötig)
+npx wrangler d1 execute theo-badge --remote --command "DELETE FROM scans;"
 ```
 
 ---
