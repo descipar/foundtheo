@@ -10,11 +10,16 @@ export interface Bindings {
   THEO_BIRTH_DATE: string;
   THEO_EMAIL: string;
   THEO_PHONE: string;
+  THEO_EMAIL_NEMETSCHEK?: string;
+  THEO_PHONE_NEMETSCHEK?: string;
+  THEO_EMAIL_DIRECT?: string;
+  THEO_PHONE_DIRECT?: string;
   THEO_NAME: string;
   THEO_BREED: string;
   THEO_TITLE: string;
   THEO_BADGE_NR: string;
   ADMIN_PASSWORD: string;
+  RESEND_API_KEY?: string;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -34,9 +39,6 @@ app.route("/theo", theoRoutes);
 app.route("/api/images", imageRoutes);
 app.route("/api/like", likesRoutes);
 app.route("/admin", adminRoutes);
-
-// TODO: Logos unter /public/logos/ einbinden sobald SVG-Dateien vorhanden sind.
-// Dann: import { serveStatic } from "hono/cloudflare-workers" + [site] in wrangler.toml
 
 // Robots.txt – alle Crawler sperren
 app.get("/robots.txt", (c) =>

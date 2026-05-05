@@ -2,10 +2,11 @@
 
 ## 🟡 Offen
 
-_(keine offenen Punkte)_
+- [ ] **Geburtstags-Easter-Egg**: Am 17. April zeigt die Seite eine kleine Animation oder einen Hinweis zu Theos Geburtstag (z.B. Konfetti, Banner „Heute hat Theo Geburtstag 🎂"). Datum-Check serverseitig in `renderPage` per `THEO_BIRTH_DATE`, kein clientseitiges Date-Parsing nötig.
 
 ## ✅ Erledigt
 
+- [x] Per-Badge Kontaktdaten: `/theo/nemetschek` und direkte Seite `/theo` können eigene E-Mail/Telefon über optionale Worker Secrets (`THEO_EMAIL_NEMETSCHEK`, `THEO_PHONE_NEMETSCHEK`, `THEO_EMAIL_DIRECT`, `THEO_PHONE_DIRECT`) bekommen – Fallback auf Standard-Secrets
 - [x] Test-Coverage erweitert (85 Tests): `db/likes.ts` komplett (getLikes, incrementLike, decrementLike MAX-Clamp, resetLikes), Like/Unlike-Routen inkl. Key-Validierung, `/theo/badges`, Admin-Mutations (delete, reset-likes); Bugfix: Unlike-Route war durch falsche Hono-Registrierungsreihenfolge unerreichbar
 - [x] Badge-Übersicht unter `/theo/badges`: Karten für alle Badge-Typen mit Theme-Farben und Live-Scan-Zählern, Links zu den einzelnen Badge-Seiten
 - [x] Image-Like-Feature: Heart-Overlay auf jedem Bild, Like-Zähler per D1 (`image_likes`-Tabelle), Toggle (Like/Unlike) per localStorage, rein optimistisches Update (kein inflight-Lock), Admin-Reset-Button, neue Bilder starten automatisch bei 0

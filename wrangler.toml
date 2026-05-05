@@ -22,6 +22,12 @@ THEO_TITLE = "Chief Snack Officer"
 THEO_BADGE_NR = "170425"
 
 # Secrets (nicht hier eintragen – als Worker Secret setzen!):
-# wrangler secret put THEO_EMAIL
-# wrangler secret put THEO_PHONE
+# wrangler secret put THEO_EMAIL              ← Standard-Kontakt (Fallback)
+# wrangler secret put THEO_PHONE              ← Standard-Kontakt (Fallback)
+# wrangler secret put THEO_EMAIL_NEMETSCHEK   ← Kontakt für /theo/nemetschek (optional)
+# wrangler secret put THEO_PHONE_NEMETSCHEK   ← Kontakt für /theo/nemetschek (optional)
+# wrangler secret put THEO_EMAIL_DIRECT       ← Kontakt für direkte Seite /theo (optional)
+# wrangler secret put THEO_PHONE_DIRECT       ← Kontakt für direkte Seite /theo (optional)
 # wrangler secret put ADMIN_PASSWORD
+# wrangler secret put RESEND_API_KEY   ← Resend API-Key für Scan-Benachrichtigungen
+#   Voraussetzung: foundtheo.de als Absender-Domain in Resend verifizieren (DNS-Eintrag)

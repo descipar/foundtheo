@@ -9,6 +9,7 @@ import { getLikes } from "../db/likes";
 import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
 import { getTheme } from "../themes";
+import { sendScanNotification } from "../email/notify";
 import type { Bindings } from "../index";
 
 const ALLOWED_BADGES  = new Set(["adesso", "nemetschek"]);
@@ -48,6 +49,13 @@ async function renderPage(
     executionCtx.waitUntil(
       recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city)
     );
+    if (source === "qr" && env.RESEND_API_KEY && env.THEO_EMAIL) {
+      executionCtx.waitUntil(
+        sendScanNotification(env.RESEND_API_KEY, env.THEO_EMAIL, {
+          badge: badgeId, source, country, city, ua,
+        })
+      );
+    }
     setCookie(c, cookieName, "1", {
       maxAge: COOKIE_MAX_AGE,
       httpOnly: true,
@@ -68,6 +76,17 @@ async function renderPage(
   const detectedLang = detectLang(lang);
   const theme = getTheme(badgeId);
 
+  const contactEmail = (badgeId === "nemetschek" && env.THEO_EMAIL_NEMETSCHEK)
+    ? env.THEO_EMAIL_NEMETSCHEK
+    : (badgeId === "direct" && env.THEO_EMAIL_DIRECT)
+    ? env.THEO_EMAIL_DIRECT
+    : env.THEO_EMAIL;
+  const contactPhone = (badgeId === "nemetschek" && env.THEO_PHONE_NEMETSCHEK)
+    ? env.THEO_PHONE_NEMETSCHEK
+    : (badgeId === "direct" && env.THEO_PHONE_DIRECT)
+    ? env.THEO_PHONE_DIRECT
+    : env.THEO_PHONE;
+
   return (
     <TheoPage
       name={env.THEO_NAME}
@@ -77,8 +96,8 @@ async function renderPage(
       ageYears={years}
       ageMonths={months}
       ageDays={days}
-      email={env.THEO_EMAIL}
-      phone={env.THEO_PHONE}
+      email={contactEmail}
+      phone={contactPhone}
       imageKeys={selectedKeys}
       badge={badgeId}
       theme={theme}

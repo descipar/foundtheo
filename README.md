@@ -17,7 +17,7 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 ## Features
 
 - Mehrsprachig (DE/EN) – automatische Spracherkennung via URL-Parameter
-- Badge-Themes: adesso, Nemetschek, Standard – per Klick wechselbar
+- Badge-Themes: adesso, Nemetschek, Direkt – automatisch nach Badge-URL, per Klick wechselbar
 - Badge-Übersicht unter `/theo/badges` mit Karten für alle Badge-Typen und Live-Scan-Zählern
 - Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
 - Foto-Galerie mit Lightbox
@@ -66,8 +66,14 @@ Secrets für lokale Entwicklung in `.dev.vars` eintragen (wird nicht committed):
 ```
 THEO_EMAIL=deine@email.de
 THEO_PHONE=+49123456789
+THEO_EMAIL_NEMETSCHEK=andere@email.de
+THEO_PHONE_NEMETSCHEK=+49123456789
+THEO_EMAIL_DIRECT=andere@email.de
+THEO_PHONE_DIRECT=+49123456789
 ADMIN_PASSWORD=beliebig
 ```
+
+Per-Badge-Kontakte sind optional – fehlt ein Wert, wird auf `THEO_EMAIL` / `THEO_PHONE` zurückgefallen.
 
 ---
 
@@ -75,22 +81,26 @@ ADMIN_PASSWORD=beliebig
 
 Deploy läuft automatisch via GitHub Actions bei jedem Push auf `main`.
 
-Benötigte GitHub Secrets:
+Benötigte GitHub Secrets (werden vom CI/CD-Workflow verwendet):
 
-| Secret | Beschreibung |
-|--------|-------------|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Account ID |
-| `THEO_EMAIL` | Kontakt-E-Mail (Worker Secret) |
-| `THEO_PHONE` | Kontakt-Telefon (Worker Secret) |
-| `ADMIN_PASSWORD` | Passwort für `/admin` (Worker Secret) |
+| Secret                   | Beschreibung                             |
+|--------------------------|------------------------------------------|
+| `CLOUDFLARE_API_TOKEN`   | Cloudflare API Token                     |
+| `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare Account ID                    |
+| `THEO_EMAIL`             | Standard-Kontakt-E-Mail (Worker Secret)  |
+| `THEO_PHONE`             | Standard-Kontakt-Telefon (Worker Secret) |
 
-Worker Secrets einmalig in Produktion setzen (bleiben über Deployments erhalten):
+Worker Secrets einmalig manuell setzen (bleiben über Deployments erhalten, werden nicht vom Workflow überschrieben):
 
 ```bash
-wrangler secret put THEO_EMAIL
-wrangler secret put THEO_PHONE
 wrangler secret put ADMIN_PASSWORD
+wrangler secret put RESEND_API_KEY        # optional – für Scan-Benachrichtigungen per E-Mail
+
+# Per-Badge Kontaktdaten (optional – Fallback auf THEO_EMAIL / THEO_PHONE)
+wrangler secret put THEO_EMAIL_NEMETSCHEK
+wrangler secret put THEO_PHONE_NEMETSCHEK
+wrangler secret put THEO_EMAIL_DIRECT
+wrangler secret put THEO_PHONE_DIRECT
 ```
 
 Manuell deployen:
