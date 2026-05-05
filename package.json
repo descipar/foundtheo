@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
+    "seed:dev": "wrangler d1 execute theo-badge --local --file scripts/seed_dev.sql",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types",
     "upload-local": "bash scripts/upload-local-images.sh",

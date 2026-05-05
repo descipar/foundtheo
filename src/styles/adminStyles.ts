@@ -183,6 +183,15 @@ export const adminStyles = `
     flex-shrink: 0;
     text-align: right;
   }
+  .bar-row__label--geo {
+    width: 7rem;
+    text-align: left;
+    color: #555;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .bar-row__outer {
     flex: 1;
     background: #f0f4f8;

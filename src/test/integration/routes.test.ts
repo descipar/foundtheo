@@ -142,3 +142,37 @@ describe("GET /robots.txt", () => {
     expect(text).toContain("Disallow: /");
   });
 });
+
+describe("GET /theo/:badge – Open Graph Meta-Tags", () => {
+  it("enthält og:title im HTML", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/adesso"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    const html = await res.text();
+    expect(html).toContain('property="og:title"');
+  });
+
+  it("enthält og:description im HTML", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/adesso"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    const html = await res.text();
+    expect(html).toContain('property="og:description"');
+  });
+
+  it("og:url enthält den Badge-Pfad", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/adesso"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    const html = await res.text();
+    expect(html).toContain("/theo/adesso");
+  });
+
+  it("enthält twitter:card im HTML", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(makeRequest("/theo/adesso"), env, ctx);
+    await waitOnExecutionContext(ctx);
+    const html = await res.text();
+    expect(html).toContain('name="twitter:card"');
+  });
+});

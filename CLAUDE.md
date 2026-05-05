@@ -19,8 +19,8 @@ Jemand findet Theo, scannt den QR-Code und sieht eine "Found this dog"-Seite mit
 ## Wichtige Entscheidungen
 - KEIN Next.js, KEIN next-on-pages – reines Hono.js direkt auf Workers
 - Bilder liegen unter `dogs/theo/` im R2 Bucket, NIE direkt öffentlich erreichbar
-- Scan-Tracking mit Deduplizierung (gleiche IP + Badge innerhalb 30 Sekunden = kein zweiter Eintrag)
-- Bildauswahl deterministisch: Seed aus `dog_id + badge_id + Datum` → gleiche 4 Bilder pro Tag
+- Scan-Tracking mit Deduplizierung (Cookie 12h + IP-Hash+Badge 12h in D1)
+- Bildauswahl: zufällige Auswahl aus R2 (Fisher-Yates mit crypto.getRandomValues) – bei jedem Aufruf neu
 - IP wird als SHA-256-Hash gespeichert, nie im Klartext
 
 ## Hund Theo

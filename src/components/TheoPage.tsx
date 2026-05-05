@@ -29,17 +29,39 @@ interface Props {
   imageLikes: Record<string, number>;
 }
 
-export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, theme, lang, stats, imageLikes }: Props) {
+export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, badge, theme, lang, stats, imageLikes }: Props) {
   const t = translations[lang];
   const ageText = t.age(ageYears, ageMonths, ageDays);
   const [heroKey, ...thumbKeys] = imageKeys;
+
+  const ogUrl = badge === "direct"
+    ? "https://foundtheo.de/theo"
+    : `https://foundtheo.de/theo/${badge}`;
+  const ogImage = heroKey
+    ? `https://foundtheo.de/api/images/${encodeURIComponent(heroKey)}`
+    : null;
+  const ogTitle = t.pageTitle(name);
+  const ogDesc = lang === "de"
+    ? `Hund ${name} (${breed}) wurde gefunden. Bitte meld dich beim Besitzer!`
+    : `Dog ${name} (${breed}) was found. Please contact the owner!`;
 
   return (
     <html lang={lang}>
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{t.pageTitle(name)}</title>
+        <title>{ogTitle}</title>
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={ogUrl} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDesc} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDesc} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+
         <style>{`
           :root {
             --color-primary:        ${theme.primary};

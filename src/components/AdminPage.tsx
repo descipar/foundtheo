@@ -2,6 +2,7 @@
 import type { AdminStats } from "../db/scans";
 import { themes } from "../themes";
 import { adminStyles } from "../styles/adminStyles";
+import { WorldMap } from "./WorldMap";
 
 interface Props {
   stats: AdminStats;
@@ -51,6 +52,27 @@ function BarChart({ days }: { days: { day: string; cnt: number }[] }) {
             />
           </div>
           <span class="bar-row__count">{d.cnt}</span>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function GeoBarChart({ rows }: { rows: { label: string; cnt: number }[] }) {
+  if (rows.length === 0) return <p class="panel--empty">Keine Daten</p>;
+  const maxCnt = Math.max(...rows.map((r) => r.cnt), 1);
+  return (
+    <>
+      {rows.map((r) => (
+        <div class="bar-row">
+          <span class="bar-row__label bar-row__label--geo">{r.label}</span>
+          <div class="bar-row__outer">
+            <div
+              class="bar-row__inner"
+              style={`width:${Math.round((r.cnt / maxCnt) * 100)}%`}
+            />
+          </div>
+          <span class="bar-row__count">{r.cnt}</span>
         </div>
       ))}
     </>
@@ -232,6 +254,9 @@ export function AdminPage({ stats, deletedMsg }: Props) {
                 { key: "cnt",     label: "Scans", numeric: true },
               ]}
             />
+            <div style="margin-top:1rem">
+              <GeoBarChart rows={countryRows.map((r) => ({ label: r.country as string, cnt: r.cnt as number }))} />
+            </div>
           </div>
           <div class="panel">
             <h2>Top Städte</h2>
@@ -242,7 +267,20 @@ export function AdminPage({ stats, deletedMsg }: Props) {
                 { key: "cnt",  label: "Scans", numeric: true },
               ]}
             />
+            <div style="margin-top:1rem">
+              <GeoBarChart rows={cityRows.map((r) => ({ label: r.city as string, cnt: r.cnt as number }))} />
+            </div>
           </div>
+        </div>
+
+        {/* Geo-Weltkarte */}
+        <div class="panel">
+          <h2>Scan-Weltkarte</h2>
+          <WorldMap
+            countryCounts={Object.fromEntries(
+              stats.topCountries.map((c) => [c.country, c.cnt])
+            )}
+          />
         </div>
 
         {/* Scan-Verwaltung – immer alle Badge-Typen anzeigen */}
