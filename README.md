@@ -152,6 +152,23 @@ npx wrangler d1 execute theo-badge --remote --command "DELETE FROM scans;"
 
 ---
 
+## Scan-Benachrichtigungen (Resend)
+
+Bei jedem QR-Scan wird optional eine E-Mail an `THEO_EMAIL` gesendet (Badge, Uhrzeit, Standort, Gerät). Voraussetzung ist ein Resend-Account und ein gesetzter `RESEND_API_KEY`.
+
+**Einrichtung:**
+
+1. Account anlegen auf [resend.com](https://resend.com) (kostenlos)
+2. Domain verifizieren: Resend → Domains → `foundtheo.de` hinzufügen → die angezeigten DNS-Einträge (DKIM, SPF) in Cloudflare DNS eintragen
+3. API Key erstellen: Resend → API Keys → Key kopieren
+4. Key als GitHub Secret `RESEND_API_KEY` hinterlegen → wird beim nächsten Deploy automatisch als Worker Secret gesetzt
+
+**Kosten:** Free-Tier (0 €) reicht mit 3.000 Mails/Monat und 100/Tag für normale Nutzung aus.
+
+Ohne gesetzten `RESEND_API_KEY` läuft alles normal – es werden nur keine Benachrichtigungen verschickt.
+
+---
+
 ## Foto-Upload Script
 
 Fotos aus einem lokalen Ordner in den R2 Bucket hochladen. YOLO erkennt automatisch Bilder mit Personen und filtert sie heraus.
