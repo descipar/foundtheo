@@ -6,8 +6,13 @@
 
 ## ✅ Erledigt
 
+- [x] Open Graph + Twitter Card Meta-Tags auf der Theo-Seite für Link-Previews (WhatsApp, iMessage etc.)
+- [x] E-Mail-Benachrichtigung bei QR-Scan via Resend API (`src/email/notify.ts`) – silent fail, nur wenn `RESEND_API_KEY` gesetzt
+- [x] Admin-Weltkarte: SVG-Heatmap (Robinson-Projektion, 39 Länder) zeigt Scan-Herkunft farblich gewichtet
+- [x] Admin: GeoBarChart für Top-Länder und Top-Städte (Balkendiagramm zusätzlich zur Tabelle)
+- [x] Seed-Daten für lokale Entwicklung (`scripts/seed_dev.sql`, `npm run seed:dev`) mit realistischen Testscans aus mehreren Ländern
 - [x] Per-Badge Kontaktdaten: `/theo/nemetschek` und direkte Seite `/theo` können eigene E-Mail/Telefon über optionale Worker Secrets (`THEO_EMAIL_NEMETSCHEK`, `THEO_PHONE_NEMETSCHEK`, `THEO_EMAIL_DIRECT`, `THEO_PHONE_DIRECT`) bekommen – Fallback auf Standard-Secrets
-- [x] Test-Coverage erweitert (85 Tests): `db/likes.ts` komplett (getLikes, incrementLike, decrementLike MAX-Clamp, resetLikes), Like/Unlike-Routen inkl. Key-Validierung, `/theo/badges`, Admin-Mutations (delete, reset-likes); Bugfix: Unlike-Route war durch falsche Hono-Registrierungsreihenfolge unerreichbar
+- [x] Test-Coverage erweitert (93 Tests): `db/likes.ts` komplett (getLikes, incrementLike, decrementLike MAX-Clamp, resetLikes), Like/Unlike-Routen inkl. Key-Validierung, `/theo/badges`, Admin-Mutations (delete, reset-likes); Bugfix: Unlike-Route war durch falsche Hono-Registrierungsreihenfolge unerreichbar
 - [x] Badge-Übersicht unter `/theo/badges`: Karten für alle Badge-Typen mit Theme-Farben und Live-Scan-Zählern, Links zu den einzelnen Badge-Seiten
 - [x] Image-Like-Feature: Heart-Overlay auf jedem Bild, Like-Zähler per D1 (`image_likes`-Tabelle), Toggle (Like/Unlike) per localStorage, rein optimistisches Update (kein inflight-Lock), Admin-Reset-Button, neue Bilder starten automatisch bei 0
 - [x] Admin-Interface: Delete-Buttons immer für alle Badge-Typen sichtbar (adesso, nemetschek, direct) – unabhängig von vorhandenen Scan-Daten
