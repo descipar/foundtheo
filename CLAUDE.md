@@ -27,7 +27,7 @@ Jemand findet Theo, scannt den QR-Code und sieht eine "Found this dog"-Seite mit
 - Name: Theo
 - Rasse: Labrador
 - Geburtsdatum: 2025-04-17
-- Besitzer-E-Mail: kai.schulte@adesso.de
+- Besitzer-E-Mail: siehe `THEO_EMAIL` Secret
 
 ## Projektstruktur
 ```
