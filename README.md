@@ -20,10 +20,11 @@ Live: **[foundtheo.de](https://foundtheo.de)**
 - Badge-Themes: adesso, Nemetschek, Direkt – automatisch nach Badge-URL, per Klick wechselbar
 - Badge-Übersicht unter `/theo/badges` mit Karten für alle Badge-Typen und Live-Scan-Zählern
 - Scan-Tracking pro Badge-Typ (QR-Code vs. Direktaufruf) inkl. Land und Stadt
+- Open Graph + Twitter Card Meta-Tags für Link-Previews (WhatsApp, iMessage, etc.)
+- E-Mail-Benachrichtigung bei QR-Scan via Resend (optional, nur wenn `RESEND_API_KEY` gesetzt)
 - Foto-Galerie mit Lightbox
 - Like-Funktion pro Bild – Heart-Overlay mit Zähler, Toggle (Like/Unlike) via localStorage, optimistisches Update ohne Wartezeit
-- Automatischer Foto-Upload mit Personenerkennung (YOLO)
-- Admin-Interface unter `/admin` mit Scan-Statistiken und Like-Verwaltung (passwortgeschützt)
+- Admin-Interface unter `/admin` mit Scan-Statistiken, Weltkarte, Geo-Balkendiagrammen und Like-Verwaltung (passwortgeschützt)
 
 ---
 
@@ -40,6 +41,7 @@ npm run test:watch       # Unit Tests im Watch-Modus
 - `calcAge()` – Altersberechnung inkl. Monats-/Jahresübergänge
 - `pickImages()` – Fisher-Yates Shuffle, Keine Duplikate, Mutation-Safety
 - `detectLang()` + `translations.age()` – Spracherkennung und Pluralformen
+- `sendScanNotification()` – Resend API-Aufruf, Silent-Fail bei Fehler/Netzwerkproblem, UA-Kürzung
 
 **Integration Tests** (`src/test/integration/`) – laufen in der echten Workers-Runtime via Miniflare:
 - `recordScan()` – Deduplication (IP-Hash, Null-IP, Badge-Trennung)
@@ -51,6 +53,7 @@ npm run test:watch       # Unit Tests im Watch-Modus
 - Route `/admin/delete` und `/admin/reset-likes` – Auth-Check, Redirect, DB-Effekte
 - Host-Check Middleware – workers.dev-Zugriff gesperrt, foundtheo.de erlaubt
 - `getLikes`, `incrementLike`, `decrementLike` (MAX-Clamp auf 0), `resetLikes` – D1-Funktionen
+- Open Graph Meta-Tags (`og:title`, `og:description`, `og:url`, `twitter:card`)
 
 ---
 
@@ -59,6 +62,12 @@ npm run test:watch       # Unit Tests im Watch-Modus
 ```bash
 npm install
 npm run dev
+```
+
+Lokale D1-Datenbank mit Testdaten befüllen (optional):
+
+```bash
+npm run seed:dev
 ```
 
 Secrets für lokale Entwicklung in `.dev.vars` eintragen (wird nicht committed):
@@ -83,24 +92,22 @@ Deploy läuft automatisch via GitHub Actions bei jedem Push auf `main`.
 
 Benötigte GitHub Secrets (werden vom CI/CD-Workflow verwendet):
 
-| Secret                   | Beschreibung                             |
-|--------------------------|------------------------------------------|
-| `CLOUDFLARE_API_TOKEN`   | Cloudflare API Token                     |
-| `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare Account ID                    |
-| `THEO_EMAIL`             | Standard-Kontakt-E-Mail (Worker Secret)  |
-| `THEO_PHONE`             | Standard-Kontakt-Telefon (Worker Secret) |
+| Secret                    | Beschreibung                                          |
+|---------------------------|-------------------------------------------------------|
+| `CLOUDFLARE_API_TOKEN`    | Cloudflare API Token                                  |
+| `CLOUDFLARE_ACCOUNT_ID`   | Cloudflare Account ID                                 |
+| `THEO_EMAIL`              | Standard-Kontakt-E-Mail                               |
+| `THEO_PHONE`              | Standard-Kontakt-Telefon                              |
+| `THEO_EMAIL_NEMETSCHEK`   | Kontakt-E-Mail für `/theo/nemetschek` (optional)      |
+| `THEO_PHONE_NEMETSCHEK`   | Kontakt-Telefon für `/theo/nemetschek` (optional)     |
+| `THEO_EMAIL_DIRECT`       | Kontakt-E-Mail für direkte Seite `/theo` (optional)   |
+| `THEO_PHONE_DIRECT`       | Kontakt-Telefon für direkte Seite `/theo` (optional)  |
+| `RESEND_API_KEY`          | Resend API-Key für Scan-Benachrichtigungen (optional) |
 
-Worker Secrets einmalig manuell setzen (bleiben über Deployments erhalten, werden nicht vom Workflow überschrieben):
+Einmalig manuell setzen (wird nicht vom Workflow verwaltet):
 
 ```bash
 wrangler secret put ADMIN_PASSWORD
-wrangler secret put RESEND_API_KEY        # optional – für Scan-Benachrichtigungen per E-Mail
-
-# Per-Badge Kontaktdaten (optional – Fallback auf THEO_EMAIL / THEO_PHONE)
-wrangler secret put THEO_EMAIL_NEMETSCHEK
-wrangler secret put THEO_PHONE_NEMETSCHEK
-wrangler secret put THEO_EMAIL_DIRECT
-wrangler secret put THEO_PHONE_DIRECT
 ```
 
 Manuell deployen:
@@ -127,7 +134,7 @@ npx wrangler d1 migrations apply theo-badge --remote
 
 Erreichbar unter `https://foundtheo.de/admin` – geschützt durch HTTP Basic Auth.
 
-Zeigt: Scan-Gesamtzahl, Aufschlüsselung nach Badge und Quelle (QR vs. Direkt), Scans der letzten 30 Tage als Balkendiagramm, Top-Länder und Top-Städte.
+Zeigt: Scan-Gesamtzahl, Aufschlüsselung nach Badge und Quelle (QR vs. Direkt), Scans der letzten 30 Tage als Balkendiagramm, Top-Länder und Top-Städte als Tabelle + Balkendiagramm, Weltkarte als SVG-Heatmap.
 
 Geo-Daten (Land, Stadt) werden automatisch aus Cloudflares Request-Metadaten gespeichert – ohne Personenbezug, nur IP-Hash wird hinterlegt.
 
