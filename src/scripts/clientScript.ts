@@ -52,6 +52,21 @@ export const clientScript = `
     document.querySelectorAll('.stats-counts span[data-theme]').forEach(function(el) {
       el.classList.toggle('active-theme', el.getAttribute('data-theme') === themeKey);
     });
+
+    if (typeof BADGE_CONTACTS !== 'undefined' && BADGE_CONTACTS[themeKey]) {
+      var bc = BADGE_CONTACTS[themeKey];
+      var phoneEl = document.getElementById('contact-phone');
+      var emailEl = document.getElementById('contact-email');
+      if (phoneEl) {
+        phoneEl.href = 'tel:' + bc.phone.replace(/\s/g, '');
+        phoneEl.textContent = '📞 ' + bc.phone;
+      }
+      if (emailEl) {
+        var subj = emailEl.getAttribute('data-subject') || '';
+        emailEl.href = 'mailto:' + bc.email + (subj ? '?subject=' + subj : '');
+        emailEl.textContent = '✉ ' + bc.email;
+      }
+    }
   }
 
   function openLightbox(src) {

@@ -10,6 +10,7 @@ export type ScanSource = "qr" | "direct";
  * Records a scan for a dog/badge combination.
  * Deduplicates within DEDUPE_SECONDS for the same ip_hash + badge_id.
  */
+/** Gibt true zurück wenn der Scan neu eingetragen wurde, false bei Duplikat. */
 export async function recordScan(
   db: D1Database,
   dogId: string,
@@ -19,7 +20,7 @@ export async function recordScan(
   source: ScanSource = "qr",
   country: string | null = null,
   city: string | null = null
-): Promise<void> {
+): Promise<boolean> {
   // Deduplication: skip if same ip_hash + badge_id within DEDUPE_SECONDS
   if (ipHash) {
     const recent = await db
@@ -32,7 +33,7 @@ export async function recordScan(
       .bind(ipHash, badgeId)
       .first();
 
-    if (recent) return;
+    if (recent) return false;
   }
 
   await db
@@ -42,6 +43,7 @@ export async function recordScan(
     )
     .bind(dogId, badgeId, ipHash, ua, source, country, city)
     .run();
+  return true;
 }
 
 export interface ScanStats {

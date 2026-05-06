@@ -4,7 +4,7 @@ import { getCookie, setCookie } from "hono/cookie";
 import { TheoPage } from "../components/TheoPage";
 import { BadgesPage } from "../components/BadgesPage";
 import { calcAge } from "../utils/calcAge";
-import { recordScan, getScanStats } from "../db/scans";
+import { recordScan, getScanStats, type ScanSource } from "../db/scans";
 import { getLikes } from "../db/likes";
 import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
@@ -46,10 +46,8 @@ async function renderPage(
 
   if (!alreadyCounted) {
     const ipHash = await hashIp(ip);
-    executionCtx.waitUntil(
-      recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city)
-    );
-    if (source === "qr" && env.RESEND_API_KEY && env.THEO_EMAIL) {
+    const isNewScan = await recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city);
+    if (isNewScan && source === "qr" && env.RESEND_API_KEY && env.THEO_EMAIL) {
       executionCtx.waitUntil(
         sendScanNotification(env.RESEND_API_KEY, env.THEO_EMAIL, {
           badge: badgeId, source, country, city, ua,
@@ -76,16 +74,12 @@ async function renderPage(
   const detectedLang = detectLang(lang);
   const theme = getTheme(badgeId);
 
-  const contactEmail = (badgeId === "nemetschek" && env.THEO_EMAIL_NEMETSCHEK)
-    ? env.THEO_EMAIL_NEMETSCHEK
-    : (badgeId === "direct" && env.THEO_EMAIL_DIRECT)
-    ? env.THEO_EMAIL_DIRECT
-    : env.THEO_EMAIL;
-  const contactPhone = (badgeId === "nemetschek" && env.THEO_PHONE_NEMETSCHEK)
-    ? env.THEO_PHONE_NEMETSCHEK
-    : (badgeId === "direct" && env.THEO_PHONE_DIRECT)
-    ? env.THEO_PHONE_DIRECT
-    : env.THEO_PHONE;
+  const badgeContacts = {
+    adesso:     { email: env.THEO_EMAIL,                                    phone: env.THEO_PHONE },
+    nemetschek: { email: env.THEO_EMAIL_NEMETSCHEK || env.THEO_EMAIL,       phone: env.THEO_PHONE_NEMETSCHEK || env.THEO_PHONE },
+    direct:     { email: env.THEO_EMAIL_DIRECT     || env.THEO_EMAIL,       phone: env.THEO_PHONE_DIRECT     || env.THEO_PHONE },
+  };
+  const activeContact = badgeContacts[badgeId as keyof typeof badgeContacts] ?? badgeContacts.adesso;
 
   return (
     <TheoPage
@@ -96,14 +90,15 @@ async function renderPage(
       ageYears={years}
       ageMonths={months}
       ageDays={days}
-      email={contactEmail}
-      phone={contactPhone}
+      email={activeContact.email}
+      phone={activeContact.phone}
       imageKeys={selectedKeys}
       badge={badgeId}
       theme={theme}
       lang={detectedLang}
       stats={stats}
       imageLikes={imageLikes}
+      badgeContacts={badgeContacts}
     />
   );
 }

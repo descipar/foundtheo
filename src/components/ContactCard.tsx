@@ -12,8 +12,8 @@ export function ContactCard({ phone, email, contactPrompt, contactSubject }: Pro
     <div class="contact">
       <p>{contactPrompt}</p>
       <div class="contact-buttons">
-        <a class="primary" href={`tel:${phone.replace(/\s/g, "")}`}>📞 {phone}</a>
-        <a class="secondary" href={`mailto:${email}?subject=${contactSubject}`}>✉ {email}</a>
+        <a id="contact-phone" class="primary" href={`tel:${phone.replace(/\s/g, "")}`}>📞 {phone}</a>
+        <a id="contact-email" class="secondary" href={`mailto:${email}?subject=${contactSubject}`} data-subject={contactSubject}>✉ {email}</a>
       </div>
     </div>
   );

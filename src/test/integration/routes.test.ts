@@ -186,29 +186,30 @@ describe("GET /theo/:badge – per-Badge Kontaktdaten", () => {
     expect(html).toContain("nemetschek@example.com");
   });
 
-  it("adesso zeigt Standard-E-Mail (kein Override)", async () => {
+  it("adesso zeigt Standard-E-Mail im Kontakt-Link (kein Override)", async () => {
     const ctx = createExecutionContext();
     const res = await app.fetch(makeRequest("/theo/adesso"), env, ctx);
     await waitOnExecutionContext(ctx);
     const html = await res.text();
-    expect(html).toContain("test@example.com");
-    expect(html).not.toContain("nemetschek@example.com");
+    expect(html).toContain("mailto:test@example.com");
+    expect(html).not.toContain("mailto:nemetschek@example.com");
   });
 
-  it("nemetschek zeigt nicht die Standard-E-Mail wenn Override gesetzt", async () => {
+  it("nemetschek zeigt Override-E-Mail im Kontakt-Link", async () => {
     const ctx = createExecutionContext();
     const res = await app.fetch(makeRequest("/theo/nemetschek"), env, ctx);
     await waitOnExecutionContext(ctx);
     const html = await res.text();
-    expect(html).not.toContain("test@example.com");
+    expect(html).toContain("mailto:nemetschek@example.com");
+    expect(html).not.toContain("mailto:test@example.com");
   });
 
-  it("direkte Seite zeigt THEO_EMAIL_DIRECT wenn gesetzt", async () => {
+  it("direkte Seite zeigt THEO_EMAIL_DIRECT im Kontakt-Link", async () => {
     const ctx = createExecutionContext();
     const res = await app.fetch(makeRequest("/theo"), env, ctx);
     await waitOnExecutionContext(ctx);
     const html = await res.text();
-    expect(html).toContain("direct@example.com");
-    expect(html).not.toContain("test@example.com");
+    expect(html).toContain("mailto:direct@example.com");
+    expect(html).not.toContain("mailto:test@example.com");
   });
 });

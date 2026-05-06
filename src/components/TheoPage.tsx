@@ -27,9 +27,11 @@ interface Props {
   stats: ScanStats;
   /** Like-Zähler pro Bild-Key: { [image_key]: count } */
   imageLikes: Record<string, number>;
+  /** Kontaktdaten pro Badge – für client-seitigen Theme-Switch */
+  badgeContacts: Record<string, { email: string; phone: string }>;
 }
 
-export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, badge, theme, lang, stats, imageLikes }: Props) {
+export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, ageDays, email, phone, imageKeys, badge, theme, lang, stats, imageLikes, badgeContacts }: Props) {
   const t = translations[lang];
   const ageText = t.age(ageYears, ageMonths, ageDays);
   const [heroKey, ...thumbKeys] = imageKeys;
@@ -129,6 +131,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
         </div>
 
         <script dangerouslySetInnerHTML={{ __html: `var IMAGE_LIKES = ${JSON.stringify(imageLikes)};` }} />
+        <script dangerouslySetInnerHTML={{ __html: `var BADGE_CONTACTS = ${JSON.stringify(badgeContacts)};` }} />
         <script dangerouslySetInnerHTML={{ __html: clientScript }} />
       </body>
     </html>
