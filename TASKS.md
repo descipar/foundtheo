@@ -2,10 +2,24 @@
 
 ## 🟡 Offen
 
+- [ ] **Kontaktdaten aller Badges in jeder Seite**: `BADGE_CONTACTS` (`TheoPage.tsx`) liefert E-Mail/Telefon aller Badges an jeden Besucher aus (für den clientseitigen Theme-Switch). Entscheiden, ob das gewollt ist – sonst Kontakt beim Theme-Wechsel nachladen oder nur den aktiven Kontakt ausliefern.
+- [ ] **Like-API absichern**: `/api/like` hat kein Rate-Limit und prüft nicht, ob das Bild in R2 existiert → beliebige Zeilen in `image_likes`, die in jede Seite eingebettet werden. Key gegen `listImageKeys` prüfen, ggf. Rate-Limit (Cloudflare Rate Limiting Rule oder Dedupe per IP-Hash).
+- [ ] **Admin-Passwortvergleich zeitkonstant**: `checkAuth` in `src/routes/admin.tsx` vergleicht per `===` – auf zeitkonstanten Vergleich umstellen (z.B. HMAC beider Werte + `crypto.subtle.timingSafeEqual`).
+- [ ] **CI: Typfehler nicht ignorieren**: `npx tsc --noEmit || true` in `deploy.yml` → `|| true` entfernen, damit Typfehler den Deploy stoppen.
+- [ ] **CI: D1-Migrationen**: werden nicht automatisch angewendet, nur manuell (`wrangler d1 migrations apply theo-badge --remote`). Optional als Schritt vor dem Deploy in die Pipeline aufnehmen.
+- [ ] **CLAUDE.md aktualisieren**: Routen (`/` → `/theo`, `/theo/badges`, `/admin`, `/api/like`, `/api/scan`), Projektstruktur (email, i18n, styles, scripts, utils, Tests) und Secrets sind veraltet.
+- [ ] **Wrangler aktualisieren**: lokal/`package.json` auf 4.84.1, aktuell 4.158.0.
+- [ ] **Scan-Zählung live verifizieren**: Seite einmal aus echtem Browser (Mobilfunknetz) aufrufen → 🌐-Zähler muss von 0 auf 1 springen (Beacon `POST /api/scan`).
 - [ ] **Geburtstags-Easter-Egg**: Am 17. April zeigt die Seite eine kleine Animation oder einen Hinweis zu Theos Geburtstag (z.B. Konfetti, Banner „Heute hat Theo Geburtstag 🎂"). Datum-Check serverseitig in `renderPage` per `THEO_BIRTH_DATE`, kein clientseitiges Date-Parsing nötig.
 
 ## ✅ Erledigt
 
+- [x] Unlike-Bug: Client rief `/api/unlike/...` statt `/api/like/unlike/...` auf – zurückgenommene Likes kamen nie an; Tests prüfen jetzt Client-URLs gegen Routen
+- [x] Bot-Filter: Scans werden erst per Client-Beacon `POST /api/scan` gezählt (nicht beim Seitenaufruf), plus UA-Bot-Filter und `navigator.webdriver`-Check; 2.308 Bot-Direktaufrufe aus D1 gelöscht (Backup vom 2026-11-05 vorhanden)
+- [x] CI: Actions auf Node-24-Versionen (checkout v7, setup-node v7, wrangler-action v4)
+- [x] Security: CSRF-Schutz für Admin-POSTs (`hono/csrf`)
+- [x] Security: HTML-Escaping in der Scan-Benachrichtigungs-Mail
+- [x] Security: IP-Hash per HMAC-SHA256 mit Secret `IP_HASH_SECRET`; alte ungesalzene Hashes per Migration 0005 entfernt
 - [x] Open Graph + Twitter Card Meta-Tags auf der Theo-Seite für Link-Previews (WhatsApp, iMessage etc.)
 - [x] E-Mail-Benachrichtigung bei QR-Scan via Resend API (`src/email/notify.ts`) – silent fail, nur wenn `RESEND_API_KEY` gesetzt
 - [x] Admin-Weltkarte: SVG-Heatmap (Robinson-Projektion, 39 Länder) zeigt Scan-Herkunft farblich gewichtet
