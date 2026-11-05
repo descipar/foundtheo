@@ -217,3 +217,43 @@ describe("POST /api/like/unlike/:key – Unlike und Key-Validierung", () => {
     expect(res.status).toBe(403);
   });
 });
+
+// ── Client-Script ↔ Route: gleiche URLs wie im Browser ───────────────────────
+
+describe("Like/Unlike mit den URLs aus clientScript.ts", () => {
+  beforeEach(async () => {
+    await env.DB.exec("DELETE FROM image_likes;");
+  });
+
+  /** Baut den Pfad exakt so wie das Client-Script (encodeURIComponent → %2F). */
+  function clientPath(action: "like" | "unlike", key: string) {
+    return action === "like"
+      ? `/api/like/${encodeURIComponent(key)}`
+      : `/api/like/unlike/${encodeURIComponent(key)}`;
+  }
+
+  it("clientScript nutzt die richtigen Endpunkte", async () => {
+    const { clientScript } = await import("../../scripts/clientScript");
+    expect(clientScript).toContain("fetch('/api/like/' + encodeURIComponent(imgKey)");
+    expect(clientScript).toContain("fetch('/api/like/unlike/' + encodeURIComponent(imgKey)");
+    expect(clientScript).not.toContain("fetch('/api/unlike/'");
+  });
+
+  it("Like und anschließendes Unlike landen beim selben Key", async () => {
+    const key = "dogs/theo/foto.jpg";
+
+    let ctx = createExecutionContext();
+    let res = await app.fetch(makePost(clientPath("like", key)), env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { cnt: number }).cnt).toBe(1);
+
+    ctx = createExecutionContext();
+    res = await app.fetch(makePost(clientPath("unlike", key)), env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { cnt: number }).cnt).toBe(0);
+
+    expect((await getLikes(env.DB))[key]).toBe(0);
+  });
+});
