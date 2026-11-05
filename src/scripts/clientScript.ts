@@ -184,4 +184,35 @@ export const clientScript = `
   } else {
     initLikes();
   }
+
+  // ── Scan-Zählung ─────────────────────────────────────────────────────────────
+
+  /**
+   * Zählt den Aufruf per Beacon an den Server – erst wenn die Seite im Browser
+   * geladen ist. Scanner, die nur HTML abholen, führen das nie aus.
+   * navigator.webdriver ist bei automatisierten Browsern (Puppeteer, Selenium) true.
+   * Wurde neu gezählt, wird der Zähler in der Stats-Bar direkt um 1 erhöht.
+   */
+  function sendScanBeacon() {
+    if (typeof CURRENT_BADGE === 'undefined' || navigator.webdriver) return;
+    fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ badge: CURRENT_BADGE }),
+      keepalive: true
+    })
+      .then(function(res) { return res.ok ? res.json() : null; })
+      .then(function(data) {
+        if (!data || !data.counted) return;
+        var el = document.querySelector('.stats-counts span[data-theme="' + CURRENT_BADGE + '"] strong');
+        if (el) el.textContent = String((parseInt(el.textContent, 10) || 0) + 1);
+      })
+      .catch(function() {});
+  }
+
+  if (document.readyState === 'complete') {
+    setTimeout(sendScanBeacon, 1000);
+  } else {
+    window.addEventListener('load', function() { setTimeout(sendScanBeacon, 1000); });
+  }
 `;

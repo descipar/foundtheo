@@ -3,6 +3,7 @@ import { theoRoutes } from "./routes/theo";
 import { imageRoutes } from "./routes/images";
 import { adminRoutes } from "./routes/admin";
 import { likesRoutes } from "./routes/likes";
+import { scanRoutes } from "./routes/scan";
 
 export interface Bindings {
   DB: D1Database;
@@ -39,6 +40,7 @@ app.use("*", async (c, next) => {
 app.route("/theo", theoRoutes);
 app.route("/api/images", imageRoutes);
 app.route("/api/like", likesRoutes);
+app.route("/api/scan", scanRoutes);
 app.route("/admin", adminRoutes);
 
 // Robots.txt – alle Crawler sperren

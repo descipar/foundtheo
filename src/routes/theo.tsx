@@ -1,62 +1,29 @@
 /** @jsxImportSource hono/jsx */
-import { Hono, type Context } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { Hono } from "hono";
 import { TheoPage } from "../components/TheoPage";
 import { BadgesPage } from "../components/BadgesPage";
 import { calcAge } from "../utils/calcAge";
-import { recordScan, getScanStats, type ScanSource } from "../db/scans";
+import { getScanStats } from "../db/scans";
 import { getLikes } from "../db/likes";
 import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
 import { getTheme } from "../themes";
-import { sendScanNotification } from "../email/notify";
-import { hashIp } from "../utils/hashIp";
 import type { Bindings } from "../index";
 
-const ALLOWED_BADGES  = new Set(["adesso", "nemetschek"]);
-const COOKIE_MAX_AGE  = 43200; // 12 Stunden
+export const ALLOWED_BADGES = new Set(["adesso", "nemetschek"]);
 
 export const theoRoutes = new Hono<{ Bindings: Bindings }>();
 
-/** Hilfsfunktion: Seite rendern */
+/**
+ * Hilfsfunktion: Seite rendern.
+ * Gezählt wird hier NICHT – das macht das Client-Script per POST /api/scan
+ * (siehe routes/scan.ts), damit reine HTML-Scanner/Crawler nicht mitzählen.
+ */
 async function renderPage(
-  c: Context<{ Bindings: Bindings }>,
   env: Bindings,
-  executionCtx: ExecutionContext,
   badgeId: string,
-  source: "qr" | "direct",
-  ip: string | null,
-  ua: string | null,
   lang: string | undefined
 ) {
-  // Geo-Daten aus Cloudflare Request Metadata (nur in Produktion verfügbar)
-  const cf = c.req.raw.cf as { country?: string; city?: string } | undefined;
-  const country = cf?.country ?? null;
-  const city = cf?.city ?? null;
-
-  // Cookie-Check: gleicher Badge bereits innerhalb der letzten Stunde gezählt?
-  const cookieName = `scanned_${badgeId}`;
-  const alreadyCounted = getCookie(c, cookieName);
-
-  if (!alreadyCounted) {
-    const ipHash = await hashIp(ip, env.IP_HASH_SECRET);
-    const isNewScan = await recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city);
-    if (isNewScan && source === "qr" && env.RESEND_API_KEY && env.THEO_EMAIL) {
-      executionCtx.waitUntil(
-        sendScanNotification(env.RESEND_API_KEY, env.THEO_EMAIL, {
-          badge: badgeId, source, country, city, ua,
-        })
-      );
-    }
-    setCookie(c, cookieName, "1", {
-      maxAge: COOKIE_MAX_AGE,
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: true,
-      path: "/",
-    });
-  }
-
   const [allKeys, stats, imageLikes] = await Promise.all([
     listImageKeys(env.IMAGES),
     getScanStats(env.DB, "theo"),
@@ -99,11 +66,8 @@ async function renderPage(
 
 /** Direkter Aufruf: foundtheo.de → keine Badge, source = direct */
 theoRoutes.get("/", async (c) => {
-  const ip = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? null;
-  const ua = c.req.header("user-agent") ?? null;
-
   return c.html(
-    await renderPage(c, c.env, c.executionCtx, "direct", "direct", ip, ua, c.req.query("lang"))
+    await renderPage(c.env, "direct", c.req.query("lang"))
   );
 });
 
@@ -121,10 +85,7 @@ theoRoutes.get("/:badge", async (c) => {
     return c.notFound();
   }
 
-  const ip = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? null;
-  const ua = c.req.header("user-agent") ?? null;
-
   return c.html(
-    await renderPage(c, c.env, c.executionCtx, badge, "qr", ip, ua, c.req.query("lang"))
+    await renderPage(c.env, badge, c.req.query("lang"))
   );
 });

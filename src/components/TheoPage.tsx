@@ -131,6 +131,7 @@ export function TheoPage({ name, breed, title, badgeNr, ageYears, ageMonths, age
         </div>
 
         <script dangerouslySetInnerHTML={{ __html: `var IMAGE_LIKES = ${JSON.stringify(imageLikes)};` }} />
+        <script dangerouslySetInnerHTML={{ __html: `var CURRENT_BADGE = ${JSON.stringify(badge)};` }} />
         <script dangerouslySetInnerHTML={{ __html: `var BADGE_CONTACTS = ${JSON.stringify(badgeContacts)};` }} />
         <script dangerouslySetInnerHTML={{ __html: clientScript }} />
       </body>
