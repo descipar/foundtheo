@@ -155,7 +155,7 @@ export const clientScript = `
         btn.title = 'Bild liken';
         updateDisplay();
 
-        fetch('/api/unlike/' + encodeURIComponent(imgKey), { method: 'POST' })
+        fetch('/api/like/unlike/' + encodeURIComponent(imgKey), { method: 'POST' })
           .catch(function() {});
       }
     });
