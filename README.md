@@ -80,6 +80,7 @@ THEO_PHONE_NEMETSCHEK=+49123456789
 THEO_EMAIL_DIRECT=andere@email.de
 THEO_PHONE_DIRECT=+49123456789
 ADMIN_PASSWORD=beliebig
+IP_HASH_SECRET=beliebig
 ```
 
 Per-Badge-Kontakte sind optional – fehlt ein Wert, wird auf `THEO_EMAIL` / `THEO_PHONE` zurückgefallen.
@@ -103,6 +104,7 @@ Benötigte GitHub Secrets (werden vom CI/CD-Workflow verwendet):
 | `THEO_EMAIL_DIRECT`       | Kontakt-E-Mail für direkte Seite `/theo` (optional)   |
 | `THEO_PHONE_DIRECT`       | Kontakt-Telefon für direkte Seite `/theo` (optional)  |
 | `RESEND_API_KEY`          | Resend API-Key für Scan-Benachrichtigungen (optional) |
+| `IP_HASH_SECRET`          | HMAC-Schlüssel für IP-Hashes, z.B. `openssl rand -hex 32` – ohne Secret wird keine IP gespeichert |
 
 Einmalig manuell setzen (wird nicht vom Workflow verwaltet):
 

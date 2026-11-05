@@ -6,6 +6,16 @@ export interface ScanEvent {
   ua: string | null;
 }
 
+/** Escaped Sonderzeichen für die Einbettung in HTML (User-Agent etc. kommen vom Besucher). */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Sendet eine Scan-Benachrichtigung per Resend API.
  * Voraussetzung: Domain foundtheo.de in Resend verifiziert,
@@ -27,20 +37,20 @@ export async function sendScanNotification(
       <table style="width:100%;border-collapse:collapse">
         <tr>
           <td style="padding:0.4rem 0;color:#888;font-size:0.85rem;width:6rem">Badge</td>
-          <td style="font-weight:700">${badgeDisplay}</td>
+          <td style="font-weight:700">${escapeHtml(badgeDisplay)}</td>
         </tr>
         <tr>
           <td style="padding:0.4rem 0;color:#888;font-size:0.85rem">Zeitpunkt</td>
-          <td>${time}</td>
+          <td>${escapeHtml(time)}</td>
         </tr>
         <tr>
           <td style="padding:0.4rem 0;color:#888;font-size:0.85rem">Standort</td>
-          <td>${location}</td>
+          <td>${escapeHtml(location)}</td>
         </tr>
         ${event.ua
           ? `<tr>
                <td style="padding:0.4rem 0;color:#888;font-size:0.85rem;vertical-align:top">Gerät</td>
-               <td style="font-size:0.8rem;color:#555;word-break:break-all">${event.ua.slice(0, 200)}</td>
+               <td style="font-size:0.8rem;color:#555;word-break:break-all">${escapeHtml(event.ua.slice(0, 200))}</td>
              </tr>`
           : ""}
       </table>

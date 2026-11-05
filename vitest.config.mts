@@ -33,6 +33,7 @@ export default defineConfig({
                 THEO_EMAIL_DIRECT: "direct@example.com",
                 THEO_PHONE_DIRECT: "+49111",
                 ADMIN_PASSWORD: "testpassword",
+                IP_HASH_SECRET: "test-ip-hash-secret",
               },
             },
           }),

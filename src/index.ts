@@ -20,6 +20,7 @@ export interface Bindings {
   THEO_BADGE_NR: string;
   ADMIN_PASSWORD: string;
   RESEND_API_KEY?: string;
+  IP_HASH_SECRET?: string;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
