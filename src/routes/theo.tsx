@@ -10,19 +10,13 @@ import { listImageKeys, pickImages } from "../r2/images";
 import { detectLang } from "../i18n/translations";
 import { getTheme } from "../themes";
 import { sendScanNotification } from "../email/notify";
+import { hashIp } from "../utils/hashIp";
 import type { Bindings } from "../index";
 
 const ALLOWED_BADGES  = new Set(["adesso", "nemetschek"]);
 const COOKIE_MAX_AGE  = 43200; // 12 Stunden
 
 export const theoRoutes = new Hono<{ Bindings: Bindings }>();
-
-/** Hilfsfunktion: IP hashen */
-async function hashIp(ip: string | null): Promise<string | null> {
-  if (!ip) return null;
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 /** Hilfsfunktion: Seite rendern */
 async function renderPage(
@@ -45,7 +39,7 @@ async function renderPage(
   const alreadyCounted = getCookie(c, cookieName);
 
   if (!alreadyCounted) {
-    const ipHash = await hashIp(ip);
+    const ipHash = await hashIp(ip, env.IP_HASH_SECRET);
     const isNewScan = await recordScan(env.DB, "theo", badgeId, ipHash, ua, source, country, city);
     if (isNewScan && source === "qr" && env.RESEND_API_KEY && env.THEO_EMAIL) {
       executionCtx.waitUntil(

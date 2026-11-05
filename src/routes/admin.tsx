@@ -1,11 +1,20 @@
 /** @jsxImportSource hono/jsx */
 import { Hono } from "hono";
+import { csrf } from "hono/csrf";
 import { AdminPage } from "../components/AdminPage";
 import { getAdminStats, deleteScans } from "../db/scans";
 import { resetLikes } from "../db/likes";
 import type { Bindings } from "../index";
 
 export const adminRoutes = new Hono<{ Bindings: Bindings }>();
+
+/**
+ * CSRF-Schutz für alle POST-Formulare im Admin-Bereich.
+ * Basic-Auth-Credentials schickt der Browser automatisch mit – ohne diesen Check
+ * könnte eine fremde Seite per Formular z.B. /admin/delete auslösen.
+ * Erlaubt nur Requests mit Sec-Fetch-Site: same-origin bzw. passendem Origin-Header.
+ */
+adminRoutes.use("*", csrf());
 
 /** Prüft HTTP Basic Auth gegen ADMIN_PASSWORD */
 function checkAuth(authHeader: string | undefined, password: string): boolean {

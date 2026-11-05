@@ -21,7 +21,7 @@ Jemand findet Theo, scannt den QR-Code und sieht eine "Found this dog"-Seite mit
 - Bilder liegen unter `dogs/theo/` im R2 Bucket, NIE direkt öffentlich erreichbar
 - Scan-Tracking mit Deduplizierung (Cookie 12h + IP-Hash+Badge 12h in D1)
 - Bildauswahl: zufällige Auswahl aus R2 (Fisher-Yates mit crypto.getRandomValues) – bei jedem Aufruf neu
-- IP wird als SHA-256-Hash gespeichert, nie im Klartext
+- IP wird als HMAC-SHA256 mit Secret `IP_HASH_SECRET` gespeichert (src/utils/hashIp.ts), nie im Klartext – ohne Secret gar nicht
 
 ## Hund Theo
 - Name: Theo

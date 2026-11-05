@@ -10,8 +10,16 @@ function makeRequest(path: string, authPassword?: string) {
   return new Request(`https://foundtheo.de${path}`, { headers });
 }
 
-function makePostRequest(path: string, authPassword?: string, body?: URLSearchParams) {
+function makePostRequest(
+  path: string,
+  authPassword?: string,
+  body?: URLSearchParams,
+  origin: string | null = "https://foundtheo.de"
+) {
   const headers: Record<string, string> = { host: "foundtheo.de" };
+  if (origin) {
+    headers["origin"] = origin;
+  }
   if (authPassword) {
     headers["authorization"] = "Basic " + btoa("admin:" + authPassword);
   }
@@ -154,5 +162,64 @@ describe("POST /admin/reset-likes – Likes zurücksetzen", () => {
     const res = await app.fetch(makePostRequest("/admin/reset-likes", "testpassword"), env, ctx);
     await waitOnExecutionContext(ctx);
     expect(res.status).toBe(302);
+  });
+});
+
+describe("CSRF-Schutz für Admin-POSTs", () => {
+  beforeEach(async () => {
+    await env.DB.exec("DELETE FROM scans;");
+    await env.DB.prepare(
+      "INSERT INTO scans (dog_id, badge_id, scanned_at, source) VALUES ('theo', 'adesso', datetime('now'), 'qr')"
+    ).run();
+  });
+
+  async function scanCount() {
+    const row = await env.DB.prepare("SELECT COUNT(*) as cnt FROM scans").first<{ cnt: number }>();
+    return row?.cnt ?? 0;
+  }
+
+  it("blockt POST von fremder Origin trotz gültiger Auth", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(
+      makePostRequest("/admin/delete", "testpassword", new URLSearchParams(), "https://evil.example"),
+      env,
+      ctx
+    );
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(403);
+    expect(await scanCount()).toBe(1);
+  });
+
+  it("blockt POST ohne Origin- und Sec-Fetch-Site-Header", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(
+      makePostRequest("/admin/delete", "testpassword", new URLSearchParams(), null),
+      env,
+      ctx
+    );
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(403);
+    expect(await scanCount()).toBe(1);
+  });
+
+  it("blockt Cross-Site-POST auf /admin/reset-likes", async () => {
+    const ctx = createExecutionContext();
+    const res = await app.fetch(
+      makePostRequest("/admin/reset-likes", "testpassword", undefined, "https://evil.example"),
+      env,
+      ctx
+    );
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(403);
+  });
+
+  it("erlaubt POST mit Sec-Fetch-Site: same-origin", async () => {
+    const req = makePostRequest("/admin/delete", "testpassword", new URLSearchParams(), null);
+    req.headers.set("sec-fetch-site", "same-origin");
+    const ctx = createExecutionContext();
+    const res = await app.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(res.status).toBe(302);
+    expect(await scanCount()).toBe(0);
   });
 });
